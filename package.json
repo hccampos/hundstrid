@@ -1,0 +1,20 @@
+{
+	"name": "goosocket",
+	"version": "0.0.1",
+	"description": "Lets a user control a goon remotely via websockets.",
+	"main": "app.js",
+	"author": "Hugo Campos <hcfields@gmail.com>",
+	"license": "MIT",
+	"dependencies": {
+		"lodash": "2.4.1",
+		"socket.io": "*",
+		"express": "*",
+		"body-parser": "*",
+		"serve-static": "*",
+		"generate-key": "0.0.6",
+		"node-uuid": "1.4.1"
+	},
+	"engines": {
+		"node": "0.10.x"
+	}
+}
