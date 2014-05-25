@@ -68,13 +68,11 @@ require([
 
 
 	function onPlayerRemoved(data) {
-		console.log(data);
-
 		if (!data.playerId || !players.hasOwnProperty(data.playerId))
 			return;
 
 		var player = players[data.playerId];
-		player.getEntity().removeFromWorld();
+		player.destroy();
 
 		delete players[data.playerId];
 
@@ -144,6 +142,8 @@ require([
 			camera = goo.world.by.name("camera").toArray()[0];
 			light = goo.world.by.name("light_1").toArray()[0];
 
+			// Remove the spaceship because we only need it to create clones.
+			// We won't actually control it or display it.
 			spaceship.removeFromWorld();
 
 			var renderSystem = goo.world.getSystem('RenderSystem');

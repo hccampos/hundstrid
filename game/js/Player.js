@@ -55,6 +55,11 @@ define([
 	}
 
 
+	Player.prototype.destroy = function () {
+		this._entity.removeFromWorld();
+	};
+
+
 	Player.prototype.applyCommand = function (command) {
 		switch(command.type) {
 			case 'keydown':
