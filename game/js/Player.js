@@ -17,7 +17,8 @@ define([
 	var KEY_SPACE = 32;
 
 
-	function Player(entity) {
+	function Player(id, entity) {
+		this.id = id;
 		this._entity = entity;
 
 		this._entity.setTranslation([Math.random() * 500 - 250, 0, Math.random() * 500 - 250]);
