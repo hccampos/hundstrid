@@ -19,18 +19,18 @@ define([
 
 	function Player(id, entity) {
 		this.id = id;
-		this._entity = entity;
+		this.entity = entity;
 
 		this.randomizeTransform();
 		this.randomizeColor();
 
-		this._script = new SpaceshipScript();
-		this._entity.setComponent(new ScriptComponent(this._script));
+		this.script = new SpaceshipScript(this);
+		this.entity.setComponent(new ScriptComponent(this.script));
 	}
 
 
 	Player.prototype.destroy = function () {
-		this._entity.removeFromWorld();
+		this.entity.removeFromWorld();
 	};
 
 
@@ -51,13 +51,13 @@ define([
 	Player.prototype.onKeyDown = function (key) {
 		switch (key) {
 			case KEY_LEFT:
-				this._script.startRotatingLeft();
+				this.script.startRotatingLeft();
 				break;
 			case KEY_RIGHT:
-				this._script.startRotatingRight();
+				this.script.startRotatingRight();
 				break;
 			case KEY_SPACE:
-				this._script.startAccelerating();
+				this.script.startAccelerating();
 				break;
 			default:
 				break;
@@ -68,13 +68,13 @@ define([
 	Player.prototype.onKeyUp = function (key) {
 		switch (key) {
 			case KEY_LEFT:
-				this._script.stopRotatingLeft();
+				this.script.stopRotatingLeft();
 				break;
 			case KEY_RIGHT:
-				this._script.stopRotatingRight();
+				this.script.stopRotatingRight();
 				break;
 			case KEY_SPACE:
-				this._script.stopAccelerating();
+				this.script.stopAccelerating();
 				break;
 			default:
 				break;
@@ -88,9 +88,9 @@ define([
 	Player.prototype.randomizeTransform = function () {
 		var x = Math.random() * 500 - 250;
 		var y = Math.random() * 500 - 250;
-		this._entity.setTranslation(x, 0, y);
+		this.entity.setTranslation(x, 0, y);
 
-		this._entity.setRotation(0, 2 * Math.random() * Math.PI, 0);
+		this.entity.setRotation(0, 2 * Math.random() * Math.PI, 0);
 	};
 
 
@@ -122,7 +122,7 @@ define([
 	 * @return {Entity}
 	 */
 	Player.prototype._getShipBody = function () {
-		var children = this._entity.children().toArray();
+		var children = this.entity.children().toArray();
 
 		for (var i = 0; i < children.length; ++i) {
 			var child = children[i];
@@ -132,10 +132,6 @@ define([
 
 		return null;
 	};
-
-
-	Player.prototype.getEntity = function () { return this._entity; }
-	Player.prototype.getScript = function () { return this._script; }
 
 
 	return Player;

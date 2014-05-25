@@ -6,7 +6,7 @@ define([
 	Player
 ) {
 	function Game(goo) {
-		this._goo = goo;
+		this.goo = goo;
 		this._players = {};
 	}
 
@@ -21,20 +21,20 @@ define([
 	 *         The config object passed as a parameter.
 	 */
 	Game.prototype.initScene = function (configs) {
-		var world = this._goo.world;
+		var world = this.goo.world;
 
 		// Make sure the world has been processed so that we can select the
 		// entities.
 		world.processEntityChanges();
 
 		// Get some entities that we are interested in.
-		this._spaceship = world.by.name("spaceship").toArray()[0];
-		this._camera = world.by.name("camera").toArray()[0];
-		this._light = world.by.name("light_1").toArray()[0];
+		this.spaceship = world.by.name("spaceship").toArray()[0];
+		this.camera = world.by.name("camera").toArray()[0];
+		this.light = world.by.name("light_1").toArray()[0];
 
 		// Remove the spaceship from the world because we only need it to create
 		// clones. We won't actually control it or display it.
-		this._spaceship.removeFromWorld();
+		this.spaceship.removeFromWorld();
 
 		return configs;
 	};
@@ -94,12 +94,13 @@ define([
 		if (!id || typeof id !== 'string')
 			return;
 
-		var world = this._goo.world;
-		var entity = EntityUtils.clone(world, this._spaceship, function (e) {
+		var world = this.goo.world;
+		var entity = EntityUtils.clone(world, this.spaceship, function (e) {
 			return e;
 		});
 
 		var player = new Player(id, entity);
+		player.game = this;
 		this._players[id] = player;
 
 		// Add the player entity to the world to display it.
@@ -119,6 +120,7 @@ define([
 		if (!player || !player.id)
 			return;
 
+		player.game = null;
 		player.destroy();
 		delete this._players[player.id];
 
@@ -180,6 +182,31 @@ define([
 	Game.prototype.getPlayerById = function (id) {
 		return typeof id === 'string' ? this._players[id] : null;
 	};
+
+
+	/**
+	 * Gets the game world bounds.
+	 *
+	 * @return {object}
+	 */
+	Game.prototype.updateBounds = function () {
+		var camera = this.camera.cameraComponent.camera;
+		var w = window.clientWidth || window.innerWidth;
+		var h = window.clientHeight || window.innerHeight;
+		var distance = this.camera.transformComponent.transform.translation[1];
+
+		var topLeft = camera.getWorldPosition(0, 0, w, h, distance);
+		var bottomRight = camera.getWorldPosition(w, h, w, h, distance);
+
+		this.bounds = {
+			minX: topLeft[0],
+			maxX: bottomRight[0],
+			minY: topLeft[2] - 20,
+			maxY: bottomRight[2] + 20
+		};
+	};
+
+	//--------------------------------------------------------------------------
 
 	return Game;
 });

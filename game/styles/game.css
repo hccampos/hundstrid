@@ -19,6 +19,7 @@ body {
 	width: 100px;
 	height: 100px;
 	border: solid 5px #fff;
+	z-index: 10;
 }
 
 #qr-code canvas {

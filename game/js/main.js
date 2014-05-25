@@ -35,7 +35,10 @@ require([
 		var gooCanvas = goo.renderer.domElement;
 		gooCanvas.style.width = '100%';
 		gooCanvas.style.height = '100%';
+		gooCanvas.style.position = 'absolute';
 		document.body.appendChild(gooCanvas);
+
+		window.addEventListener('resize', onWindowResized);
 
 		game = new Game(goo);
 
@@ -103,6 +106,11 @@ require([
 			});
 		});
 
+		goo.callbacks.push(function () {
+			game.updateBounds();
+			goo.callbacks = [];
+		});
+
 		goo.renderer.setClearColor(0, 0, 0, 1.0);
 
 		return promise;
@@ -135,6 +143,11 @@ require([
 	}
 
 
+	function onWindowResized(e) {
+		game.updateBounds();
+	};
+
+
 	/**
 	 * Generates a new QR code through which players can join the game.
 	 *
@@ -144,8 +157,8 @@ require([
 	 *         The key used to authenticate players.
 	 */
 	function makeCode(id, key) {
-		var $qrCode = $('#qr-code');
-		var qrCode = new QRCode($qrCode[0]);
+		var qrCodeElement = document.getElementById('qr-code');
+		var qrCode = new QRCode(qrCodeElement);
 
 		var baseUrl = getURL() + '/controller'
 		var encodedId = encodeURIComponent(id);
@@ -155,7 +168,7 @@ require([
 
 		qrCode.makeCode(url);
 
-		$qrCode.attr('href', url);
+		qrCodeElement.setAttribute('href', url);
 	}
 
 
