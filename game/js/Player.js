@@ -21,37 +21,10 @@ define([
 		this.id = id;
 		this._entity = entity;
 
-		this._entity.setTranslation([Math.random() * 500 - 250, 0, Math.random() * 500 - 250]);
-
-		var shipBody = null;
-
-		var children = entity.children().toArray();
-		for (var i = 0; i < children.length; ++i) {
-			var child = children[i];
-			if (child.name === 'body') {
-				shipBody = child;
-				break;
-			}
-		}
-
-		if (shipBody) {
-			var presetMaterial = shipBody.meshRendererComponent.materials[0];
-
-			var material = new Material();
-			material.shader = Material.createShader(ShaderLib.uber, 'DefaultShader');
-
-			var r = Math.random() * 0.9 + 0.1;
-			var b = Math.random() * 0.9 + 0.1;
-			var g = Math.random() * 0.9 + 0.1;
-
-			material.uniforms.materialDiffuse = [r, g, b, 1];
-			material.uniforms.materialAmbient = [0.2, 0.2, 0.2, 1];
-
-			shipBody.meshRendererComponent.materials = [material];
-		}
+		this.randomizeTransform();
+		this.randomizeColor();
 
 		this._script = new SpaceshipScript();
-
 		this._entity.setComponent(new ScriptComponent(this._script));
 	}
 
@@ -106,6 +79,58 @@ define([
 			default:
 				break;
 		}
+	};
+
+
+	/**
+	 * Positions and rotates the ship randomly.
+	 */
+	Player.prototype.randomizeTransform = function () {
+		var x = Math.random() * 500 - 250;
+		var y = Math.random() * 500 - 250;
+		this._entity.setTranslation(x, 0, y);
+
+		this._entity.setRotation(0, 2 * Math.random() * Math.PI, 0);
+	};
+
+
+	/**
+	 * Sets the color of the ship randomly.
+	 */
+	Player.prototype.randomizeColor = function () {
+		shipBody = this._getShipBody();
+		if (!shipBody)
+			return;
+
+		var material = new Material();
+		material.shader = Material.createShader(ShaderLib.uber, 'DefaultShader');
+
+		var r = Math.random();
+		var b = Math.random();
+		var g = Math.random();
+
+		material.uniforms.materialDiffuse = [r, g, b, 1];
+		material.uniforms.materialAmbient = [0.1, 0.1, 0.1, 1];
+
+		shipBody.meshRendererComponent.materials = [material];
+	};
+
+
+	/**
+	 * Gets the entity that has the mesh that represents the body of the ship.
+	 *
+	 * @return {Entity}
+	 */
+	Player.prototype._getShipBody = function () {
+		var children = this._entity.children().toArray();
+
+		for (var i = 0; i < children.length; ++i) {
+			var child = children[i];
+			if (child.name === 'body')
+				return child;
+		}
+
+		return null;
 	};
 
 
