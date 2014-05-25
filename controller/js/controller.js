@@ -65,7 +65,7 @@
 	function sendCommand(cmd, data) {
 		socket.emit('command', {
 			gameId: gameData.gameId,
-			command = { type: cmd, data: data }
+			command: { type: cmd, data: data }
 		});
 	}
 
