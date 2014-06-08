@@ -8,6 +8,9 @@ define([
 	function Game(goo) {
 		this.goo = goo;
 		this._players = {};
+		this._spaceship = null;
+		this._camera = null;
+		this._light = null;
 	}
 
 
@@ -28,13 +31,13 @@ define([
 		world.processEntityChanges();
 
 		// Get some entities that we are interested in.
-		this.spaceship = world.by.name("spaceship").toArray()[0];
-		this.camera = world.by.name("camera").toArray()[0];
-		this.light = world.by.name("light_1").toArray()[0];
+		this._spaceship = world.by.name("spaceship").toArray()[0];
+		this._camera = world.by.name("camera").toArray()[0];
+		this._light = world.by.name("light_1").toArray()[0];
 
 		// Remove the spaceship from the world because we only need it to create
 		// clones. We won't actually control it or display it.
-		this.spaceship.removeFromWorld();
+		this._spaceship.removeFromWorld();
 
 		return configs;
 	};
@@ -95,7 +98,7 @@ define([
 			return;
 
 		var world = this.goo.world;
-		var entity = EntityUtils.clone(world, this.spaceship, function (e) {
+		var entity = EntityUtils.clone(world, this._spaceship, function (e) {
 			return e;
 		});
 
@@ -190,10 +193,10 @@ define([
 	 * @return {object}
 	 */
 	Game.prototype.updateBounds = function () {
-		var camera = this.camera.cameraComponent.camera;
+		var camera = this._camera.cameraComponent.camera;
 		var w = window.clientWidth || window.innerWidth;
 		var h = window.clientHeight || window.innerHeight;
-		var distance = this.camera.transformComponent.transform.translation[1];
+		var distance = this._camera.transformComponent.transform.translation[1];
 
 		var topLeft = camera.getWorldPosition(0, 0, w, h, distance);
 		var bottomRight = camera.getWorldPosition(w, h, w, h, distance);

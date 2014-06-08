@@ -16,6 +16,8 @@ define([
 	var KEY_ENTER = 13;
 	var KEY_SPACE = 32;
 
+	var SHIP_SCALE = 0.08;
+
 
 	function Player(id, entity) {
 		this.id = id;
@@ -56,7 +58,7 @@ define([
 			case KEY_RIGHT:
 				this.script.startRotatingRight();
 				break;
-			case KEY_SPACE:
+			case KEY_UP:
 				this.script.startAccelerating();
 				break;
 			default:
@@ -73,7 +75,7 @@ define([
 			case KEY_RIGHT:
 				this.script.stopRotatingRight();
 				break;
-			case KEY_SPACE:
+			case KEY_UP:
 				this.script.stopAccelerating();
 				break;
 			default:
@@ -89,6 +91,7 @@ define([
 		var x = Math.random() * 500 - 250;
 		var y = Math.random() * 500 - 250;
 		this.entity.setTranslation(x, 0, y);
+		this.entity.setScale(SHIP_SCALE, SHIP_SCALE, SHIP_SCALE);
 
 		this.entity.setRotation(0, 2 * Math.random() * Math.PI, 0);
 	};
@@ -103,7 +106,7 @@ define([
 			return;
 
 		var material = new Material();
-		material.shader = Material.createShader(ShaderLib.uber, 'DefaultShader');
+		material.shader = Material.createShader(ShaderLib.uber, 'Ship Material');
 
 		var r = Math.random();
 		var b = Math.random();

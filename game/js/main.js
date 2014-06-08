@@ -3,13 +3,15 @@ require([
 	'goo/entities/GooRunner',
 	'goo/loaders/DynamicLoader',
 	'socket.io/socket.io',
-	'js/Game'
+	'js/Game',
+	'js/Bullet'
 ], function (
 	RSVP,
 	GooRunner,
 	DynamicLoader,
 	io,
-	Game
+	Game,
+	Bullet
 ) {
 	"use strict";
 
@@ -52,6 +54,7 @@ require([
 		.then(game.initScene.bind(game))
 		.then(initRenderer)
 		.then(initConnections)
+		.then(setupLocalPlayer)
 		.then(null, function (error) {
 			console.error(error);
 		});
@@ -126,6 +129,39 @@ require([
 		socket.on('playerAdded', game.onPlayerConnected.bind(game));
 		socket.on('playerRemoved', game.onPlayerDisconnected.bind(game));
 		socket.emit('registerGame', null, onRegistered);
+	}
+
+
+	function setupLocalPlayer() {
+		game.addPlayer('local');
+
+		document.addEventListener('keydown', function (event) {
+			game.onCommand({
+				playerId: 'local',
+				command: {
+					type: 'keydown',
+					data: {
+						key: event.key || event.keyCode
+					}
+				}
+			});
+		});
+
+		document.addEventListener('keyup', function (event) {
+			console.log(event);
+
+			game.onCommand({
+				playerId: 'local',
+				command: {
+					type: 'keyup',
+					data: {
+						key: event.key || event.keyCode
+					}
+				}
+			});
+		});
+
+		new Bullet(goo.world).addToWorld();
 	}
 
 

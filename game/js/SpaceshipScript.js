@@ -1,17 +1,21 @@
 define([
-	'goo/math/Vector2'
+	'goo/math/Vector2',
+	'js/BulletManager'
 ], function (
-	Vector2
+	Vector2,
+	BulletManager
 ) {
 	'use strict';
 
-	var ACCELERATION = 500;
-	var ROTATION_SPEED = 8;
+	var ACCELERATION = 800;
+	var ROTATION_SPEED = 18;
 	var SPEED_REDUCTION_FACTOR = 0.98;
-	var ROTATION_REDUCTION_FACTOR = 0.95;
+	var ROTATION_REDUCTION_FACTOR = 0.93;
 
 	function SpaceshipScript(player) {
 		this._player = player;
+		this._bulletManager = new BulletManager(100);
+		this._entity = null;
 
 		this._velocity = new Vector2();
 		this._posDif = new Vector2();
@@ -24,6 +28,11 @@ define([
 
 
 	SpaceshipScript.prototype.run = function (entity, tpf, env) {
+		if (!this._entity) {
+			this._entity = entity;
+			return;
+		}
+
 		//------------
 		// Translation
 		//------------
@@ -70,8 +79,16 @@ define([
 
 		this._rotationSpeed *= ROTATION_REDUCTION_FACTOR;
 		entity.addRotation(0, this._rotationSpeed * tpf, 0);
+
+		//--------
+		// Bullets
+		//--------
+		this._bulletManager.update(tpf, bounds);
 	};
 
+	SpaceshipScript.prototype.shoot = function () {
+		this._bulletManager.spawn()
+	};
 
 	SpaceshipScript.prototype.startRotatingLeft = function () {
 		this._isRotatingLeft = true;
