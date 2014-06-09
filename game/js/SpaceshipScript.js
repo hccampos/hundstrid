@@ -7,6 +7,7 @@ define([
 ) {
 	'use strict';
 
+	var MAX_BULLETS = 300;
 	var ACCELERATION = 800;
 	var ROTATION_SPEED = 18;
 	var SPEED_REDUCTION_FACTOR = 0.98;
@@ -14,7 +15,7 @@ define([
 
 	function SpaceshipScript(player) {
 		this._player = player;
-		this._bulletManager = new BulletManager(100);
+		this._bulletManager = new BulletManager(player.game.world, MAX_BULLETS);
 		this._entity = null;
 
 		this._velocity = new Vector2();
@@ -87,8 +88,19 @@ define([
 	};
 
 	SpaceshipScript.prototype.shoot = function () {
-		this._bulletManager.spawn()
+		if (!this._entity)
+			return;
+
+		var pos = this._entity.getTranslation();
+		var dir = this._entity.getRotation()[1];
+
+		var x = this._velocity[0] * Math.sin(dir);
+		var y = this._velocity[1] * Math.cos(dir);
+		var speed = Math.sqrt(x * x + y * y);
+
+		this._bulletManager.spawn(pos, dir, speed);
 	};
+
 
 	SpaceshipScript.prototype.startRotatingLeft = function () {
 		this._isRotatingLeft = true;

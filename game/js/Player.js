@@ -19,9 +19,10 @@ define([
 	var SHIP_SCALE = 0.08;
 
 
-	function Player(id, entity) {
+	function Player(game, id, entity) {
 		this.id = id;
 		this.entity = entity;
+		this.game = game;
 
 		this.randomizeTransform();
 		this.randomizeColor();
@@ -36,47 +37,57 @@ define([
 	};
 
 
+	keyDownHandlers = {}
+	keyDownHandlers[KEY_LEFT] = function () {
+		this.script.startRotatingLeft();
+	};
+
+	keyDownHandlers[KEY_RIGHT] = function () {
+		this.script.startRotatingRight();
+	};
+
+	keyDownHandlers[KEY_UP] = function () {
+		this.script.startAccelerating();
+	};
+
+	keyDownHandlers[KEY_SPACE] = function () {
+		if (this._isShooting)
+			return;
+
+		this.script.shoot();
+		this._isShooting = true;
+	};
+
+
+	keyUpHandlers = {}
+	keyUpHandlers[KEY_LEFT] = function () {
+		this.script.stopRotatingLeft();
+	};
+
+	keyUpHandlers[KEY_RIGHT] = function () {
+		this.script.stopRotatingRight();
+	};
+
+	keyUpHandlers[KEY_UP] = function () {
+		this.script.stopAccelerating();
+	};
+
+	keyUpHandlers[KEY_SPACE] = function () {
+		this._isShooting = false;
+	};
+
+
 	Player.prototype.applyCommand = function (command) {
 		switch(command.type) {
 			case 'keydown':
-				this.onKeyDown(command.data.key);
+				if (keyDownHandlers.hasOwnProperty(command.data.key)) {
+					keyDownHandlers[command.data.key].apply(this);
+				}
 				break;
 			case 'keyup':
-				this.onKeyUp(command.data.key);
-				break;
-			default:
-				break;
-		}
-	};
-
-
-	Player.prototype.onKeyDown = function (key) {
-		switch (key) {
-			case KEY_LEFT:
-				this.script.startRotatingLeft();
-				break;
-			case KEY_RIGHT:
-				this.script.startRotatingRight();
-				break;
-			case KEY_UP:
-				this.script.startAccelerating();
-				break;
-			default:
-				break;
-		}
-	};
-
-
-	Player.prototype.onKeyUp = function (key) {
-		switch (key) {
-			case KEY_LEFT:
-				this.script.stopRotatingLeft();
-				break;
-			case KEY_RIGHT:
-				this.script.stopRotatingRight();
-				break;
-			case KEY_UP:
-				this.script.stopAccelerating();
+				if (keyUpHandlers.hasOwnProperty(command.data.key)) {
+					keyUpHandlers[command.data.key].apply(this);
+				}
 				break;
 			default:
 				break;

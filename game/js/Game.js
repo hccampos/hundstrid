@@ -7,6 +7,7 @@ define([
 ) {
 	function Game(goo) {
 		this.goo = goo;
+		this.world = goo.world;
 		this._players = {};
 		this._spaceship = null;
 		this._camera = null;
@@ -24,16 +25,14 @@ define([
 	 *         The config object passed as a parameter.
 	 */
 	Game.prototype.initScene = function (configs) {
-		var world = this.goo.world;
-
 		// Make sure the world has been processed so that we can select the
 		// entities.
-		world.processEntityChanges();
+		this.world.processEntityChanges();
 
 		// Get some entities that we are interested in.
-		this._spaceship = world.by.name("spaceship").toArray()[0];
-		this._camera = world.by.name("camera").toArray()[0];
-		this._light = world.by.name("light_1").toArray()[0];
+		this._spaceship = this.world.by.name("spaceship").toArray()[0];
+		this._camera = this.world.by.name("camera").toArray()[0];
+		this._light = this.world.by.name("light_1").toArray()[0];
 
 		// Remove the spaceship from the world because we only need it to create
 		// clones. We won't actually control it or display it.
@@ -97,17 +96,15 @@ define([
 		if (!id || typeof id !== 'string')
 			return;
 
-		var world = this.goo.world;
-		var entity = EntityUtils.clone(world, this._spaceship, function (e) {
+		var entity = EntityUtils.clone(this.world, this._spaceship, function (e) {
 			return e;
 		});
 
-		var player = new Player(id, entity);
-		player.game = this;
+		var player = new Player(this, id, entity);
 		this._players[id] = player;
 
 		// Add the player entity to the world to display it.
-		world.addEntity(entity);
+		this.world.addEntity(entity);
 
 		console.log('Player was added: ' + id);
 	};
@@ -123,7 +120,6 @@ define([
 		if (!player || !player.id)
 			return;
 
-		player.game = null;
 		player.destroy();
 		delete this._players[player.id];
 

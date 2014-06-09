@@ -3,15 +3,13 @@ require([
 	'goo/entities/GooRunner',
 	'goo/loaders/DynamicLoader',
 	'socket.io/socket.io',
-	'js/Game',
-	'js/Bullet'
+	'js/Game'
 ], function (
 	RSVP,
 	GooRunner,
 	DynamicLoader,
 	io,
-	Game,
-	Bullet
+	Game
 ) {
 	"use strict";
 
@@ -148,8 +146,6 @@ require([
 		});
 
 		document.addEventListener('keyup', function (event) {
-			console.log(event);
-
 			game.onCommand({
 				playerId: 'local',
 				command: {
@@ -160,8 +156,6 @@ require([
 				}
 			});
 		});
-
-		new Bullet(goo.world).addToWorld();
 	}
 
 
