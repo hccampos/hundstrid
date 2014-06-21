@@ -97,12 +97,12 @@ define([
 		var material = new Material();
 		material.shader = Material.createShader(ShaderLib.uber, 'Ship Material');
 
-		var r = Math.random();
-		var b = Math.random();
-		var g = Math.random();
+		var r = Math.random() + 0.2;
+		var b = Math.random() + 0.2;
+		var g = Math.random() + 0.2;
 
 		material.uniforms.materialDiffuse = [r, g, b, 1];
-		material.uniforms.materialAmbient = [0.1, 0.1, 0.1, 1];
+		material.uniforms.materialAmbient = [0.0, 0.0, 0.0, 1];
 
 		shipBody.meshRendererComponent.materials = [material];
 	};

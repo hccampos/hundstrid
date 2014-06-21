@@ -26,18 +26,49 @@ define([
 	ParticleSystemUtils
 ) {
 	var SCALE = 80;
+	var MAX_PARTICLES = 5000;
+	var PARTICLES_PER_SECOND = 300;
+	var EMITTER_SETTINGS = {
+		minLifetime: 0.3,
+		maxLifetime: 0.5,
+		releaseRatePerSecond: 0,
+		getEmissionVelocity: function (particle, particleEntity) {
+			var vec3 = particle.velocity;
+
+			// Spread the particles a bit to make the effect look more natural.
+			vec3.data[0] = (Math.random() - 0.5) * 10;
+			vec3.data[1] = (Math.random() - 0.5) * 10;
+			vec3.data[2] = (Math.random() + 4) * 2 * -300;
+
+			return ParticleUtils.applyEntityTransformVector(vec3, particleEntity);
+		},
+		timeline: [{
+			timeOffset: 0.0,
+			spin: 0,
+			mass: 1,
+			size: 15,
+			color: [1, 1, 1, 0.5]
+		}, {
+			timeOffset: 1.0,
+			spin: 10,
+			size: 5.0,
+			color: [0, 0, 1, 0]
+		}]
+	};
+
 
 	var textureCreator = new TextureCreator()
 	var texture = textureCreator.loadTexture2D('assets/smoke.png');
 	//var texture = ParticleSystemUtils.createFlareTexture()
 	texture.generateMipmaps = true;
 
-	var material = Material.createMaterial(ShaderLib.particles, 'BulletMaterial');
+	var material = Material.createMaterial(ShaderLib.particles, 'ThrusterMaterial');
 	material.setTexture('DIFFUSE_MAP', texture);
 	material.blendState.blending = 'AdditiveBlending';
 	material.cullState.enabled = false;
 	material.depthState.write = false;
 	material.renderQueue = 2002;
+
 
 	/**
 	 * Creates a new bullet.
@@ -45,14 +76,16 @@ define([
 	function Thruster(world, name, id) {
 		Entity.apply(this, arguments); // Super constructor.
 
-		this._createEmitter();
-
 		var transformComponent = new TransformComponent();
 		transformComponent.setTranslation(0, 0, -200);
 		transformComponent.setScale(SCALE, SCALE, 1);
 
-		var particleComponent = new ParticleComponent({	particleCount : 5000 });
-		particleComponent.emitters.push(this.emitter);
+		this._emitter = new ParticleEmitter(EMITTER_SETTINGS);
+
+		var particleComponent = new ParticleComponent({
+			particleCount : MAX_PARTICLES
+		});
+		particleComponent.emitters.push(this._emitter);
 
 		var meshDataComponent = new MeshDataComponent(particleComponent.meshData);
 
@@ -69,54 +102,13 @@ define([
 	Thruster.prototype.constructor = Thruster;
 
 
-	/**
-	 * Creates a new particle emitter for the thruster.
-	 *
-	 * @return {ParticleEmitter}
-	 *		The emitter that was created.
-	 */
-	Thruster.prototype._createEmitter = function () {
-		var that = this;
-
-		this.emitter = new ParticleEmitter({
-			minLifetime: 0.3,
-			maxLifetime: 0.5,
-			releaseRatePerSecond: 0,
-			getEmissionVelocity: function (particle, particleEntity) {
-				var vec3 = particle.velocity;
-				//vec3.setd(0, 0, -1500);
-
-				vec3.data[0] = (Math.random() - 0.5) * 10;
-				vec3.data[1] = (Math.random() - 0.5) * 10;
-				vec3.data[2] = (Math.random() + 4) * 2 * -300;
-
-				return ParticleUtils.applyEntityTransformVector(vec3, particleEntity);
-			},
-			timeline: [{
-				timeOffset: 0.0,
-				spin: 0,
-				mass: 1,
-				size: 15,
-				color: [1, 1, 1, 0.5]
-			}, {
-				timeOffset: 1.0,
-				spin: 10,
-				size: 5.0,
-				color: [0, 0, 1, 0]
-			}]
-		});
-
-		return this.emitter;
-	};
-
-
 	Thruster.prototype.start = function () {
-		this.emitter.releaseRatePerSecond = 500;
+		this._emitter.releaseRatePerSecond = PARTICLES_PER_SECOND;
 	};
 
 
 	Thruster.prototype.stop = function () {
-		this.emitter.releaseRatePerSecond = 0;
+		this._emitter.releaseRatePerSecond = 0;
 	};
 
 
