@@ -2,12 +2,14 @@ define([
 	'goo/renderer/Material',
 	'goo/renderer/shaders/ShaderLib',
 	'goo/entities/components/ScriptComponent',
-	'js/SpaceshipScript'
+	'js/SpaceshipScript',
+	'js/Thruster'
 ], function (
 	Material,
 	ShaderLib,
 	ScriptComponent,
-	SpaceshipScript
+	SpaceshipScript,
+	Thruster
 ) {
 	var KEY_LEFT = 37;
 	var KEY_RIGHT = 39;
@@ -24,54 +26,16 @@ define([
 		this.entity = entity;
 		this.game = game;
 
-		this.keyBindings = {
-			startRotatingLeft: {
-				type: 'keydown',
-				key: KEY_LEFT,
-				action: 'rotateLeft'
-			},
-			stopRotatingLeft: {
-				type: 'keyup',
-				key: KEY_LEFT,
-				action: 'rotateLeft'
-			},
-			startRotatingRight: {
-				type: 'keydown',
-				key: KEY_RIGHT,
-				action: 'rotateRight'
-			},
-			stopRotatingRight: {
-				type: 'keyup',
-				key: KEY_RIGHT,
-				action: 'rotateRight'
-			},
-			startAccelerating: {
-				type: 'keydown',
-				key: KEY_UP,
-				action: 'accelerate'
-			},
-			stopAccelerating: {
-				type: 'keyup',
-				key: KEY_UP,
-				action: 'accelerate'
-			},
-			startShooting: {
-				type: 'keydown',
-				key: KEY_SPACE,
-				action: 'shoot'
-			},
-			stopShooting: {
-				type: 'keyup',
-				key: KEY_SPACE,
-				action: 'shoot'
-			}
-		};
+		this._setupDefaultKeyBindings();
 
 		this.randomizeTransform();
 		this.randomizeColor();
 
 		this.script = new SpaceshipScript(this);
 		this.entity.setComponent(new ScriptComponent(this.script));
+
+		this.thruster = new Thruster(this.game.world).addToWorld();
+		this.entity.attachChild(this.thruster);
 	}
 
 
@@ -159,6 +123,52 @@ define([
 		}
 
 		return null;
+	};
+
+
+	Player.prototype._setupDefaultKeyBindings = function () {
+		this.keyBindings = {
+			startRotatingLeft: {
+				type: 'keydown',
+				key: KEY_LEFT,
+				action: 'rotateLeft'
+			},
+			stopRotatingLeft: {
+				type: 'keyup',
+				key: KEY_LEFT,
+				action: 'rotateLeft'
+			},
+			startRotatingRight: {
+				type: 'keydown',
+				key: KEY_RIGHT,
+				action: 'rotateRight'
+			},
+			stopRotatingRight: {
+				type: 'keyup',
+				key: KEY_RIGHT,
+				action: 'rotateRight'
+			},
+			startAccelerating: {
+				type: 'keydown',
+				key: KEY_UP,
+				action: 'accelerate'
+			},
+			stopAccelerating: {
+				type: 'keyup',
+				key: KEY_UP,
+				action: 'accelerate'
+			},
+			startShooting: {
+				type: 'keydown',
+				key: KEY_SPACE,
+				action: 'shoot'
+			},
+			stopShooting: {
+				type: 'keyup',
+				key: KEY_SPACE,
+				action: 'shoot'
+			}
+		};
 	};
 
 

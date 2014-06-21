@@ -7,11 +7,11 @@ define([
 ) {
 	'use strict';
 
-	var MAX_BULLETS = 300;
+	var MAX_BULLETS = 1000;
 	var ACCELERATION = 800;
-	var ROTATION_SPEED = 18;
+	var ROTATION_SPEED = 22;
 	var SPEED_REDUCTION_FACTOR = 0.98;
-	var ROTATION_REDUCTION_FACTOR = 0.93;
+	var ROTATION_REDUCTION_FACTOR = 0.85;
 
 	function SpaceshipScript(player) {
 		this._player = player;
@@ -34,12 +34,12 @@ define([
 			return;
 		}
 
+		var angle = entity.getRotation()[1];
+
 		//------------
 		// Translation
 		//------------
 		if (this._isAccelerating) {
-			var angle = entity.getRotation()[1];
-
 			var xAcc = ACCELERATION * tpf * Math.sin(angle);
 			var yAcc = ACCELERATION * tpf * Math.cos(angle);
 			this._velocity.add([xAcc, yAcc]);
@@ -124,11 +124,13 @@ define([
 
 	SpaceshipScript.prototype.startAccelerating = function () {
 		this._isAccelerating = true;
+		this._player.thruster.start();
 	};
 
 
 	SpaceshipScript.prototype.stopAccelerating = function () {
 		this._isAccelerating = false;
+		this._player.thruster.stop();
 	};
 
 
