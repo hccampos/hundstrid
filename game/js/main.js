@@ -97,24 +97,15 @@ require([
 		var renderSystem = goo.world.getSystem('RenderSystem');
 		var promise = new RSVP.Promise();
 
-		goo.renderer.precompileShaders(renderSystem._activeEntities, renderSystem.lights, function () {
-			goo.renderer.preloadMaterials(renderSystem._activeEntities, function () {
-				goo.world.processEntityChanges();
-				goo.startGameLoop();
-				goo.renderer.domElement.focus();
-
-				promise.resolve();
-			});
-		});
+		goo.renderer.setClearColor(0, 0, 0, 1.0);
+		goo.world.processEntityChanges();
+		goo.startGameLoop();
+		goo.renderer.domElement.focus();
 
 		goo.callbacks.push(function () {
 			game.updateBounds();
 			goo.callbacks = [];
 		});
-
-		goo.renderer.setClearColor(0, 0, 0, 1.0);
-
-		return promise;
 	}
 
 
@@ -127,20 +118,34 @@ require([
 		socket.on('playerAdded', game.onPlayerConnected.bind(game));
 		socket.on('playerRemoved', game.onPlayerDisconnected.bind(game));
 		socket.emit('registerGame', null, onRegistered);
+
+		return true;
 	}
 
 
 	function setupLocalPlayer() {
-		game.addPlayer('local');
+		var player1 = game.addPlayer('local');
+		var player2 = game.addPlayer('local2');
+
+		player2.setKeyForAction('rotateLeft', 65);
+		player2.setKeyForAction('rotateRight', 68);
+		player2.setKeyForAction('accelerate', 87);
+		player2.setKeyForAction('shoot', 16);
 
 		document.addEventListener('keydown', function (event) {
 			game.onCommand({
 				playerId: 'local',
 				command: {
 					type: 'keydown',
-					data: {
-						key: event.key || event.keyCode
-					}
+					data: { key: event.key || event.keyCode }
+				}
+			});
+
+			game.onCommand({
+				playerId: 'local2',
+				command: {
+					type: 'keydown',
+					data: { key: event.key || event.keyCode }
 				}
 			});
 		});
@@ -150,9 +155,15 @@ require([
 				playerId: 'local',
 				command: {
 					type: 'keyup',
-					data: {
-						key: event.key || event.keyCode
-					}
+					data: { key: event.key || event.keyCode }
+				}
+			});
+
+			game.onCommand({
+				playerId: 'local2',
+				command: {
+					type: 'keyup',
+					data: { key: event.key || event.keyCode }
 				}
 			});
 		});
@@ -195,7 +206,6 @@ require([
 		var encodedKey = encodeURIComponent(key);
 
 		var url = baseUrl + '?gameId=' + encodedId + '&key=' + encodedKey
-
 		qrCode.makeCode(url);
 
 		qrCodeElement.setAttribute('href', url);

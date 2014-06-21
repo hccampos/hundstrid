@@ -30,9 +30,9 @@ define([
 		this.world.processEntityChanges();
 
 		// Get some entities that we are interested in.
-		this._spaceship = this.world.by.name("spaceship").toArray()[0];
-		this._camera = this.world.by.name("camera").toArray()[0];
-		this._light = this.world.by.name("light_1").toArray()[0];
+		this._spaceship = this.world.by.name('spaceship').toArray()[0];
+		this._camera = this.world.by.name('camera').toArray()[0];
+		this._light = this.world.by.name('light_1').toArray()[0];
 
 		// Remove the spaceship from the world because we only need it to create
 		// clones. We won't actually control it or display it.
@@ -107,6 +107,8 @@ define([
 		this.world.addEntity(entity);
 
 		console.log('Player was added: ' + id);
+
+		return player;
 	};
 
 
@@ -124,6 +126,8 @@ define([
 		delete this._players[player.id];
 
 		console.log('Player was removed: ' + player.id);
+
+		return this;
 	};
 
 
@@ -138,7 +142,7 @@ define([
 		if (!player)
 			return;
 
-		this.removePlayer(player);
+		return this.removePlayer(player);
 	};
 
 
@@ -203,6 +207,8 @@ define([
 			minY: topLeft[2] - 20,
 			maxY: bottomRight[2] + 20
 		};
+
+		return this;
 	};
 
 	//--------------------------------------------------------------------------

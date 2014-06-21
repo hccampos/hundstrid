@@ -132,5 +132,19 @@ define([
 	};
 
 
+	SpaceshipScript.prototype.startShooting = function () {
+		if (this._isShooting)
+			return;
+
+		this.shoot();
+		this._isShooting = true;
+	};
+
+
+	SpaceshipScript.prototype.stopShooting = function () {
+		this._isShooting = false;
+	};
+
+
 	return SpaceshipScript;
 });

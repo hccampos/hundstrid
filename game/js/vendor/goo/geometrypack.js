@@ -10,4 +10,4 @@ paths:{goo:localStorage.gooPath}
 });
 }else f()
 }catch(e){f()}
-})(window,undefined)
+})(window)

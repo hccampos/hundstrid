@@ -12,8 +12,8 @@ define([
 	var KEY_LEFT = 37;
 	var KEY_RIGHT = 39;
 	var KEY_UP = 38;
-	var KEY_DOWN = 40;
-	var KEY_ENTER = 13;
+	//var KEY_DOWN = 40;
+	//var KEY_ENTER = 13;
 	var KEY_SPACE = 32;
 
 	var SHIP_SCALE = 0.08;
@@ -23,6 +23,49 @@ define([
 		this.id = id;
 		this.entity = entity;
 		this.game = game;
+
+		this.keyBindings = {
+			startRotatingLeft: {
+				type: 'keydown',
+				key: KEY_LEFT,
+				action: 'rotateLeft'
+			},
+			stopRotatingLeft: {
+				type: 'keyup',
+				key: KEY_LEFT,
+				action: 'rotateLeft'
+			},
+			startRotatingRight: {
+				type: 'keydown',
+				key: KEY_RIGHT,
+				action: 'rotateRight'
+			},
+			stopRotatingRight: {
+				type: 'keyup',
+				key: KEY_RIGHT,
+				action: 'rotateRight'
+			},
+			startAccelerating: {
+				type: 'keydown',
+				key: KEY_UP,
+				action: 'accelerate'
+			},
+			stopAccelerating: {
+				type: 'keyup',
+				key: KEY_UP,
+				action: 'accelerate'
+			},
+			startShooting: {
+				type: 'keydown',
+				key: KEY_SPACE,
+				action: 'shoot'
+			},
+			stopShooting: {
+				type: 'keyup',
+				key: KEY_SPACE,
+				action: 'shoot'
+			}
+		};
 
 		this.randomizeTransform();
 		this.randomizeColor();
@@ -37,60 +80,31 @@ define([
 	};
 
 
-	keyDownHandlers = {}
-	keyDownHandlers[KEY_LEFT] = function () {
-		this.script.startRotatingLeft();
-	};
-
-	keyDownHandlers[KEY_RIGHT] = function () {
-		this.script.startRotatingRight();
-	};
-
-	keyDownHandlers[KEY_UP] = function () {
-		this.script.startAccelerating();
-	};
-
-	keyDownHandlers[KEY_SPACE] = function () {
-		if (this._isShooting)
-			return;
-
-		this.script.shoot();
-		this._isShooting = true;
-	};
-
-
-	keyUpHandlers = {}
-	keyUpHandlers[KEY_LEFT] = function () {
-		this.script.stopRotatingLeft();
-	};
-
-	keyUpHandlers[KEY_RIGHT] = function () {
-		this.script.stopRotatingRight();
-	};
-
-	keyUpHandlers[KEY_UP] = function () {
-		this.script.stopAccelerating();
-	};
-
-	keyUpHandlers[KEY_SPACE] = function () {
-		this._isShooting = false;
-	};
-
-
 	Player.prototype.applyCommand = function (command) {
-		switch(command.type) {
-			case 'keydown':
-				if (keyDownHandlers.hasOwnProperty(command.data.key)) {
-					keyDownHandlers[command.data.key].apply(this);
-				}
-				break;
-			case 'keyup':
-				if (keyUpHandlers.hasOwnProperty(command.data.key)) {
-					keyUpHandlers[command.data.key].apply(this);
-				}
-				break;
-			default:
-				break;
+		var type = command.type;
+		var key = command.data.key;
+
+		for (var commandName in this.keyBindings) {
+			var binding = this.keyBindings[commandName];
+
+			if (binding.type === type && binding.key === key)
+				this.script[commandName](command.data);
+		}
+	};
+
+
+	Player.prototype.setKeyBindings = function (bindings) {
+		for (var action in bindings) {
+			this.setKeyForAction(action, bindings[action]);
+		}
+	};
+
+
+	Player.prototype.setKeyForAction = function (action, key) {
+		for (var commandName in this.keyBindings) {
+			var binding = this.keyBindings[commandName];
+			if (binding.action === action)
+				binding.key = key;
 		}
 	};
 
@@ -112,7 +126,7 @@ define([
 	 * Sets the color of the ship randomly.
 	 */
 	Player.prototype.randomizeColor = function () {
-		shipBody = this._getShipBody();
+		var shipBody = this._getShipBody();
 		if (!shipBody)
 			return;
 
