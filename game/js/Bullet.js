@@ -24,10 +24,10 @@ define([
 	var X_ROTATION = -Math.PI / 2;
 
 	var textureCreator = new TextureCreator()
-	var bulletTexture = textureCreator.loadTexture2D('assets/bullet.png');
-	var material = Material.createMaterial(ShaderLib.texturedLit, 'BulletMaterial');
+	var bulletTexture = textureCreator.loadTexture2D('assets/beam.jpg');
+	var material = Material.createMaterial(ShaderLib.textured, 'BulletMaterial');
 	material.setTexture('DIFFUSE_MAP', bulletTexture);
-	material.blendState.blending = 'CustomBlending';
+	material.blendState.blending = 'AdditiveBlending';
 
 	// Quad where the bullet texture will be rendered.
 	var meshData = new Quad();
@@ -46,7 +46,7 @@ define([
 		var transformComponent = new TransformComponent();
 		transformComponent.setTranslation(0, 0, 0);
 		transformComponent.setRotation(X_ROTATION, 0, 0);
-		transformComponent.setScale(SIZE, SIZE, 1);
+		transformComponent.setScale(SIZE, SIZE / 2, 1);
 		this.setComponent(transformComponent);
 
 		var meshDataComponent = new MeshDataComponent(meshData);

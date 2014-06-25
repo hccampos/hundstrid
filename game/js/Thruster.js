@@ -1,37 +1,25 @@
 define([
 	'goo/entities/Entity',
-	'goo/math/Vector3',
-	'goo/renderer/Material',
-	'goo/renderer/TextureCreator',
-	'goo/renderer/shaders/ShaderLib',
-	'goo/entities/components/TransformComponent',
-	'goo/entities/components/ParticleComponent',
-	'goo/entities/components/MeshDataComponent',
-	'goo/entities/components/MeshRendererComponent',
-	'goo/particles/ParticleEmitter',
 	'goo/particles/ParticleUtils',
-	'goo/util/ParticleSystemUtils'
+	'js/ParticleEntity'
 ], function (
 	Entity,
-	Vector3,
-	Material,
-	TextureCreator,
-	ShaderLib,
-	TransformComponent,
-	ParticleComponent,
-	MeshDataComponent,
-	MeshRendererComponent,
-	ParticleEmitter,
 	ParticleUtils,
-	ParticleSystemUtils
+	ParticleEntity
 ) {
-	var SCALE = 80;
-	var MAX_PARTICLES = 5000;
+	var SCALE = 100;
 	var PARTICLES_PER_SECOND = 300;
+
 	var EMITTER_SETTINGS = {
+		maxParticles: 5000,
 		minLifetime: 0.3,
-		maxLifetime: 0.5,
+		maxLifetime: 0.3,
 		releaseRatePerSecond: 0,
+		getEmissionPoint: function (particle, particleEntity) {
+			var vec3 = particle.position;
+			vec3.setd(0, 0, Math.random() * 100);
+			return ParticleUtils.applyEntityTransformPoint(vec3, particleEntity);
+		},
 		getEmissionVelocity: function (particle, particleEntity) {
 			var vec3 = particle.velocity;
 
@@ -46,59 +34,30 @@ define([
 			timeOffset: 0.0,
 			spin: 0,
 			mass: 1,
-			size: 15,
-			color: [1, 1, 1, 0.5]
+			size: 10,
+			color: [1, 1, 1, 1.5]
 		}, {
 			timeOffset: 1.0,
 			spin: 10,
-			size: 5.0,
+			size: 6.0,
 			color: [0, 0, 1, 0]
 		}]
 	};
 
 
-	var textureCreator = new TextureCreator()
-	var texture = textureCreator.loadTexture2D('assets/smoke.png');
-	//var texture = ParticleSystemUtils.createFlareTexture()
-	texture.generateMipmaps = true;
-
-	var material = Material.createMaterial(ShaderLib.particles, 'ThrusterMaterial');
-	material.setTexture('DIFFUSE_MAP', texture);
-	material.blendState.blending = 'AdditiveBlending';
-	material.cullState.enabled = false;
-	material.depthState.write = false;
-	material.renderQueue = 2002;
-
-
 	/**
-	 * Creates a new bullet.
+	 * Creates a new thruster.
 	 */
 	function Thruster(world, name, id) {
-		Entity.apply(this, arguments); // Super constructor.
+		ParticleEntity.call(this, world, name, id, EMITTER_SETTINGS); // Super
 
-		var transformComponent = new TransformComponent();
-		transformComponent.setTranslation(0, 0, -200);
-		transformComponent.setScale(SCALE, SCALE, 1);
+		this.setTranslation(0, 0, -200);
+		this.setScale(SCALE, SCALE, 1);
 
-		this._emitter = new ParticleEmitter(EMITTER_SETTINGS);
-
-		var particleComponent = new ParticleComponent({
-			particleCount : MAX_PARTICLES
-		});
-		particleComponent.emitters.push(this._emitter);
-
-		var meshDataComponent = new MeshDataComponent(particleComponent.meshData);
-
-		var meshRendererComponent = new MeshRendererComponent();
-		meshRendererComponent.materials.push(material);
-		meshRendererComponent.cullMode = 'Never';
-
-		this.setComponent(transformComponent);
-		this.setComponent(particleComponent);
-		this.setComponent(meshDataComponent);
-		this.setComponent(meshRendererComponent);
+		var material = ParticleEntity.createMaterial('ThrusterMaterial', 'assets/smoke.png', 2002);
+		this.meshRendererComponent.materials.push(material);
 	}
-	Thruster.prototype = Object.create(Entity.prototype);
+	Thruster.prototype = Object.create(ParticleEntity.prototype);
 	Thruster.prototype.constructor = Thruster;
 
 

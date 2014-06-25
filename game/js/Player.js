@@ -3,19 +3,23 @@ define([
 	'goo/renderer/shaders/ShaderLib',
 	'goo/entities/components/ScriptComponent',
 	'js/SpaceshipScript',
-	'js/Thruster'
+	'js/Thruster',
+	'js/Explosion',
+	'js/Sparks'
 ], function (
 	Material,
 	ShaderLib,
 	ScriptComponent,
 	SpaceshipScript,
-	Thruster
+	Thruster,
+	Explosion,
+	Sparks
 ) {
 	var KEY_LEFT = 37;
 	var KEY_RIGHT = 39;
 	var KEY_UP = 38;
-	//var KEY_DOWN = 40;
-	//var KEY_ENTER = 13;
+	var KEY_DOWN = 40;
+	var KEY_ENTER = 13;
 	var KEY_SPACE = 32;
 
 	var SHIP_SCALE = 0.08;
@@ -36,6 +40,12 @@ define([
 
 		this.thruster = new Thruster(this.game.world).addToWorld();
 		this.entity.attachChild(this.thruster);
+
+		this.explosion = new Explosion(this.game.world).addToWorld();
+		this.entity.attachChild(this.explosion);
+
+		this.sparks = new Sparks(this.game.world).addToWorld();
+		this.entity.attachChild(this.sparks);
 	}
 
 
@@ -167,6 +177,11 @@ define([
 				type: 'keyup',
 				key: KEY_SPACE,
 				action: 'shoot'
+			},
+			explode: {
+				type: 'keyup',
+				key: KEY_DOWN,
+				action: 'explode'
 			}
 		};
 	};

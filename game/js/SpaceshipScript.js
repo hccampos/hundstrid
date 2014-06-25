@@ -1,8 +1,10 @@
 define([
 	'goo/math/Vector2',
+	'goo/math/Vector3',
 	'js/BulletManager'
 ], function (
 	Vector2,
+	Vector3,
 	BulletManager
 ) {
 	'use strict';
@@ -12,6 +14,7 @@ define([
 	var ROTATION_SPEED = 22;
 	var SPEED_REDUCTION_FACTOR = 0.98;
 	var ROTATION_REDUCTION_FACTOR = 0.85;
+	var BULLET_POS_OFFSET = 25;
 
 	function SpaceshipScript(player) {
 		this._player = player;
@@ -25,6 +28,8 @@ define([
 		this._isAccelerating = false;
 		this._isRotatingLeft = false;
 		this._isRotatingRight = false;
+
+		this._bulletSpawnPos = new Vector3();
 	}
 
 
@@ -91,14 +96,20 @@ define([
 		if (!this._entity)
 			return;
 
-		var pos = this._entity.getTranslation();
 		var dir = this._entity.getRotation()[1];
+		var sin = Math.sin(dir);
+		var cos = Math.cos(dir);
 
-		var x = this._velocity[0] * Math.sin(dir);
-		var y = this._velocity[1] * Math.cos(dir);
+		var pos = this._entity.getTranslation();
+		this._bulletSpawnPos[0] = pos[0] + sin * BULLET_POS_OFFSET;
+		this._bulletSpawnPos[1] = pos[1];
+		this._bulletSpawnPos[2] = pos[2] + cos * BULLET_POS_OFFSET;
+
+		var x = this._velocity[0] * sin;
+		var y = this._velocity[1] * cos;
 		var speed = Math.sqrt(x * x + y * y);
 
-		this._bulletManager.spawn(pos, dir, speed);
+		this._bulletManager.spawn(this._bulletSpawnPos, dir, speed);
 	};
 
 
@@ -147,6 +158,11 @@ define([
 		this._isShooting = false;
 	};
 
+
+	SpaceshipScript.prototype.explode = function () {
+		this._player.explosion.explode(this._velocity);
+		this._player.sparks.explode(this._velocity);
+	};
 
 	return SpaceshipScript;
 });
