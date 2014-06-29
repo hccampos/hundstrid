@@ -64,5 +64,28 @@ define([
 		return null;
 	};
 
+
+	/**
+	 * Gets all the live bullets that match the specified collision predicate.
+	 *
+	 * @param  {[type]} collisionPredicate
+	 *		The predicate used to determine if a bullet is colliding. It
+	 *		receives the bullet object and should return true or false depending
+	 *		on whether the bullet is colliding or not.
+	 *
+	 * @return {Array}
+	 *		An array of all the live bullets that match the specified predicate.
+	 */
+	BulletManager.prototype.getCollidingBullets = function (collisionPredicate) {
+		var collidingBullets = [];
+		for (var i = 0; i < this.numBullets; ++i) {
+			var bullet = this._bullets[i];
+			if (bullet.isAlive && collisionPredicate(bullet)) {
+				collidingBullets.push(bullet);
+			}
+		}
+		return collidingBullets;
+	};
+
 	return BulletManager;
 });

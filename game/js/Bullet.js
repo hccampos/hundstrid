@@ -22,6 +22,7 @@ define([
 	var SIZE = 30;
 	var SPEED = 700;
 	var X_ROTATION = -Math.PI / 2;
+	var DAMAGE = 100;
 
 	var textureCreator = new TextureCreator()
 	var bulletTexture = textureCreator.loadTexture2D('assets/beam.jpg');
@@ -35,7 +36,7 @@ define([
 	/**
 	 * Creates a new bullet.
 	 */
-	function Bullet(world) {
+	function Bullet(world, id, name) {
 		Entity.apply(this, arguments); // Super constructor.
 
 		this.player = null;
@@ -94,6 +95,7 @@ define([
 		this.direction = direction;
 		this.speed = speed + SPEED;
 		this.isAlive = true;
+		this.damage = DAMAGE;
 		this.addToWorld();
 	};
 

@@ -1,24 +1,23 @@
 define([
 	'goo/math/Vector2',
-	'goo/math/Vector3',
-	'js/BulletManager'
+	'goo/math/Vector3'
 ], function (
 	Vector2,
-	Vector3,
-	BulletManager
+	Vector3
 ) {
 	'use strict';
 
-	var MAX_BULLETS = 1000;
 	var ACCELERATION = 800;
 	var ROTATION_SPEED = 22;
 	var SPEED_REDUCTION_FACTOR = 0.98;
 	var ROTATION_REDUCTION_FACTOR = 0.85;
 	var BULLET_POS_OFFSET = 25;
 
-	function SpaceshipScript(player) {
-		this._player = player;
-		this._bulletManager = new BulletManager(player.game.world, MAX_BULLETS);
+
+	function SpaceshipScript(ship, bulletManager, getBounds) {
+		this._ship = ship;
+		this._bulletManager = bulletManager;
+		this._getBounds = getBounds;
 		this._entity = null;
 
 		this._velocity = new Vector2();
@@ -55,7 +54,7 @@ define([
 		entity.addTranslation(this._posDif[0], 0, this._posDif[1]);
 
 		var t = entity.getTranslation();
-		var bounds = this._player.game.bounds;
+		var bounds = this._getBounds();
 		if (t[0] > bounds.maxX) {
 			entity.setTranslation(bounds.minX + 1, t[1], t[2]);
 		}
@@ -135,13 +134,13 @@ define([
 
 	SpaceshipScript.prototype.startAccelerating = function () {
 		this._isAccelerating = true;
-		this._player.thruster.start();
+		this._ship.thruster.start();
 	};
 
 
 	SpaceshipScript.prototype.stopAccelerating = function () {
 		this._isAccelerating = false;
-		this._player.thruster.stop();
+		this._ship.thruster.stop();
 	};
 
 
@@ -160,8 +159,9 @@ define([
 
 
 	SpaceshipScript.prototype.explode = function () {
-		this._player.explosion.explode(this._velocity);
+		this._ship.explosion.explode(this._velocity);
 	};
+
 
 	return SpaceshipScript;
 });

@@ -1,14 +1,21 @@
 define([
+	'goo/entities/Entity',
 	'goo/entities/EntityUtils',
-	'js/Player'
+	'goo/entities/components/ScriptComponent',
+	'js/Player',
+	'js/MatchScript'
 ], function (
+	Entity,
 	EntityUtils,
-	Player
+	ScriptComponent,
+	Player,
+	MatchScript
 ) {
 	function Game(goo) {
 		this.goo = goo;
 		this.world = goo.world;
-		this._players = {};
+		this.players = {};
+		this.playersArray = [];
 		this._spaceship = null;
 		this._camera = null;
 		this._light = null;
@@ -38,7 +45,20 @@ define([
 		// clones. We won't actually control it or display it.
 		this._spaceship.removeFromWorld();
 
+		// Put a match script inside of an entity.
+		this.matchScript = new MatchScript(this);
+		var matchEntity = new Entity(this.world).addToWorld();
+		matchEntity.setComponent(new ScriptComponent(this.matchScript));
+
 		return configs;
+	};
+
+
+	Game.prototype.initConnections = function (socket) {
+		this.socket = socket;
+		socket.on('command', this.onCommand.bind(this));
+		socket.on('playerAdded', this.onPlayerConnected.bind(this));
+		socket.on('playerRemoved', this.onPlayerDisconnected.bind(this));
 	};
 
 
@@ -96,15 +116,15 @@ define([
 		if (!id || typeof id !== 'string')
 			return;
 
-		var entity = EntityUtils.clone(this.world, this._spaceship, function (e) {
+		var ship = EntityUtils.clone(this.world, this._spaceship, function (e) {
 			return e;
 		});
 
-		var player = new Player(this, id, entity);
-		this._players[id] = player;
+		var player = new Player(this, id, ship);
+		this.players[id] = player;
+		this.playersArray.push(player);
 
-		// Add the player entity to the world to display it.
-		this.world.addEntity(entity);
+		player.spawn();
 
 		console.log('Player was added: ' + id);
 
@@ -123,7 +143,12 @@ define([
 			return;
 
 		player.destroy();
-		delete this._players[player.id];
+
+		this.playersArray = this.playersArray.filter(function (p) {
+			return player === p;
+		});
+
+		delete this.players[player.id];
 
 		console.log('Player was removed: ' + player.id);
 
@@ -170,7 +195,7 @@ define([
 	 *         True if the game has the specified player and false otherwise.
 	 */
 	Game.prototype.hasPlayerById = function (id) {
-		return !!this._players[id];
+		return !!this.players[id];
 	};
 
 
@@ -183,7 +208,7 @@ define([
 	 * @return {Player}
 	 */
 	Game.prototype.getPlayerById = function (id) {
-		return typeof id === 'string' ? this._players[id] : null;
+		return typeof id === 'string' ? this.players[id] : null;
 	};
 
 

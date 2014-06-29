@@ -1,21 +1,11 @@
 define([
-	'goo/renderer/Material',
-	'goo/renderer/shaders/ShaderLib',
-	'goo/entities/components/ScriptComponent',
-	'js/SpaceshipScript',
-	'js/Thruster',
-	'js/Explosion',
-	'js/Fireball',
-	'js/Sparks'
+	'js/Ship',
+	'js/BulletManager',
+	'js/SpaceshipScript'
 ], function (
-	Material,
-	ShaderLib,
-	ScriptComponent,
-	SpaceshipScript,
-	Thruster,
-	Explosion,
-	Fireball,
-	Sparks
+	Ship,
+	BulletManager,
+	SpaceshipScript
 ) {
 	var KEY_LEFT = 37;
 	var KEY_RIGHT = 39;
@@ -24,35 +14,52 @@ define([
 	var KEY_ENTER = 13;
 	var KEY_SPACE = 32;
 
-	var SHIP_SCALE = 0.08;
+	var FULL_HEALTH = 100;
+	var RESPAWN_TIME = 6000;
 
 
-	function Player(game, id, entity) {
+	/**
+	 * Creates a new player.
+	 */
+	function Player(game, id, shipModel) {
 		this.id = id;
-		this.entity = entity;
 		this.game = game;
+		this.kills = 0;
 
 		this._setupDefaultKeyBindings();
 
-		this.randomizeTransform();
-		this.randomizeColor();
+		var world = this.game.world;
 
-		this.script = new SpaceshipScript(this);
-		this.entity.setComponent(new ScriptComponent(this.script));
+		this.bulletManager = new BulletManager(world, 1000);
 
-		this.thruster = new Thruster(this.game.world).addToWorld();
-		this.entity.attachChild(this.thruster);
+		this.ship = new Ship(world).addToWorld();
+		this.ship.setModel(shipModel);
+		this.ship.randomizeColor();
 
-		this.explosion = new Explosion(this.game.world).addToWorld();
-		this.entity.attachChild(this.explosion);
+		var that = this;
+		var script = new SpaceshipScript(this.ship, this.bulletManager, function () {
+			return that.game.bounds;
+		});
+
+		this.ship.setScript(script);
 	}
 
 
+	/**
+	 * Destroys the player. This is called when a player is disconnected.
+	 */
 	Player.prototype.destroy = function () {
-		this.entity.removeFromWorld();
+		this.ship.removeFromWorld();
+		this.ship = null;
 	};
 
 
+	/**
+	 * Applies the specified command to this player.
+	 *
+	 * @param  {object} command
+	 *		The command which is to be applied.
+	 */
 	Player.prototype.applyCommand = function (command) {
 		var type = command.type;
 		var key = command.data.key;
@@ -61,7 +68,7 @@ define([
 			var binding = this.keyBindings[commandName];
 
 			if (binding.type === type && binding.key === key)
-				this.script[commandName](command.data);
+				this.ship.script[commandName](command.data);
 		}
 	};
 
@@ -82,56 +89,57 @@ define([
 	};
 
 
-	/**
-	 * Positions and rotates the ship randomly.
-	 */
-	Player.prototype.randomizeTransform = function () {
-		var x = Math.random() * 500 - 250;
-		var y = Math.random() * 500 - 250;
-		this.entity.setTranslation(x, 0, y);
-		this.entity.setScale(SHIP_SCALE, SHIP_SCALE, SHIP_SCALE);
+	Player.prototype.applyHits = function (bullets) {
+		// If the player is dead, it can't get hit anymore.
+		if (this.isDead()) { return; }
 
-		this.entity.setRotation(0, 2 * Math.random() * Math.PI, 0);
-	};
+		for (var i = 0; i < bullets.length; ++i) {
+			var bullet = bullets[i];
 
+			bullet.kill();
+			this.health -= bullet.damage;
 
-	/**
-	 * Sets the color of the ship randomly.
-	 */
-	Player.prototype.randomizeColor = function () {
-		var shipBody = this._getShipBody();
-		if (!shipBody)
-			return;
-
-		var material = new Material();
-		material.shader = Material.createShader(ShaderLib.uber, 'Ship Material');
-
-		var r = Math.random() + 0.2;
-		var b = Math.random() + 0.2;
-		var g = Math.random() + 0.2;
-
-		material.uniforms.materialDiffuse = [r, g, b, 1];
-		material.uniforms.materialAmbient = [0.0, 0.0, 0.0, 1];
-
-		shipBody.meshRendererComponent.materials = [material];
-	};
-
-
-	/**
-	 * Gets the entity that has the mesh that represents the body of the ship.
-	 *
-	 * @return {Entity}
-	 */
-	Player.prototype._getShipBody = function () {
-		var children = this.entity.children().toArray();
-
-		for (var i = 0; i < children.length; ++i) {
-			var child = children[i];
-			if (child.name === 'body')
-				return child;
+			if (this.isDead()) {
+				this.kill();
+				return true;
+			}
 		}
 
-		return null;
+		return false;
+	};
+
+
+	Player.prototype.spawn = function () {
+		this.health = FULL_HEALTH;
+		this.ship.spawn();
+	};
+
+
+	Player.prototype.kill = function () {
+		this.health = 0;
+		this.ship.kill();
+
+		var that = this;
+		window.setTimeout(function () {
+			that.spawn();
+		}, RESPAWN_TIME);
+	};
+
+
+	Player.prototype.scoreKill = function () {
+		this.kills++;
+	};
+
+
+	Player.prototype.isDead = function () {
+		return this.health <= 0;
+	};
+
+
+	Player.prototype.isCollision = function (bullet) {
+		var pos = this.ship.getTranslation();
+		var bulletPos = bullet.getTranslation();
+		return pos.distance(bulletPos) <= 30;
 	};
 
 
@@ -176,11 +184,6 @@ define([
 				type: 'keyup',
 				key: KEY_SPACE,
 				action: 'shoot'
-			},
-			explode: {
-				type: 'keyup',
-				key: KEY_DOWN,
-				action: 'explode'
 			}
 		};
 	};

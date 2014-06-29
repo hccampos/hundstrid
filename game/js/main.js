@@ -52,9 +52,10 @@ require([
 		.then(game.initScene.bind(game))
 		.then(initRenderer)
 		.then(initConnections)
-		.then(setupLocalPlayer)
+		.then(setupLocalPlayers)
 		.then(null, function (error) {
 			console.error(error);
+			console.error(error.stack);
 		});
 	}
 
@@ -114,16 +115,14 @@ require([
 	 */
 	function initConnections() {
 		var socket = io.connect(getURL());
-		socket.on('command', game.onCommand.bind(game));
-		socket.on('playerAdded', game.onPlayerConnected.bind(game));
-		socket.on('playerRemoved', game.onPlayerDisconnected.bind(game));
+		game.initConnections(socket);
 		socket.emit('registerGame', null, onRegistered);
 
 		return true;
 	}
 
 
-	function setupLocalPlayer() {
+	function setupLocalPlayers() {
 		var player1 = game.addPlayer('local');
 		var player2 = game.addPlayer('local2');
 
