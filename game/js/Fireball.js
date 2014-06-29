@@ -10,38 +10,39 @@ define([
 	ParticleEntity
 ) {
 	var SCALE = 100;
-	var PARTICLES_PER_SECOND = 2000;
+	var PARTICLES_PER_SECOND = 3000;
 	var CUTTOFF_DURATION_SECS = 0.1;
-	var MAX_LIFETIME_SECS = 1;
-	var SPEED_SCALE = 800;
+	var MAX_LIFETIME_SECS = 1.2;
+	var SPEED_SCALE = 300;
 
 	var EMITTER_SETTINGS = {
-		maxParticles: 1000,
-		minLifetime: 0.3,
+		maxParticles: 5000,
+		minLifetime: 0.2,
 		maxLifetime: MAX_LIFETIME_SECS,
 		releaseRatePerSecond: 0,
 		timeline: [{
 			timeOffset: 0.0,
 			spin: 0,
 			mass: 1,
-			size: 1,
+			size: 5,
 			color: [0, 0, 0, 0]
 		},
 		{
-			timeOffset: 0.1,
-			size: 2,
-			color: [1, 1, 1, 1.0]
+			timeOffset: 0.3,
+			size: 50,
+			color: [0.5, 0.1, 0.1, 0.9]
 		},
 		{
-			timeOffset: 1.0,
-			color: [1, 1, 1, 0.0]
+			timeOffset: 0.9,
+			size: 60,
+			color: [0.3, 0.3, 0, 0.0]
 		}],
 		influences: [
 			new ParticleInfluence({
 				apply: function (tpf, particle, index) {
-					particle.velocity[0] *= 0.95;
-					particle.velocity[1] *= 0.95;
-					particle.velocity[2] *= 0.95;
+					particle.velocity[0] *= 0.96;
+					particle.velocity[1] *= 0.96;
+					particle.velocity[2] *= 0.96;
 				}
 			})
 		]
@@ -49,10 +50,9 @@ define([
 
 
 	/**
-	 * Creates a new sparks particle entity that can be used as part of an
-	 * explosion.
+	 * Creates a new fireball that can be used as part of an explosion.
 	 */
-	function Sparks(world, name, id) {
+	function Fireball(world, name, id) {
 		var that = this;
 
 		EMITTER_SETTINGS.getEmissionVelocity = function (particle, particleEntity) {
@@ -66,14 +66,14 @@ define([
 
 		this.setScale(SCALE, SCALE, SCALE);
 
-		var material = ParticleEntity.createMaterial('ExplosionMaterial', 'assets/spark.png', 2000);
+		var material = ParticleEntity.createMaterial('FireballMaterial', 'assets/smoke.png', 2004);
 		this.meshRendererComponent.materials.push(material);
 	}
-	Sparks.prototype = Object.create(ParticleEntity.prototype);
-	Sparks.prototype.constructor = Sparks;
+	Fireball.prototype = Object.create(ParticleEntity.prototype);
+	Fireball.prototype.constructor = Fireball;
 
 
-	Sparks.prototype.explode = function (velocity) {
+	Fireball.prototype.explode = function (velocity) {
 		this._velocity = velocity;
 		this._emitter.releaseRatePerSecond = PARTICLES_PER_SECOND;
 
@@ -88,10 +88,10 @@ define([
 	};
 
 
-	Sparks.prototype.getDuration = function () {
+	Fireball.prototype.getDuration = function () {
 		return MAX_LIFETIME_SECS + CUTTOFF_DURATION_SECS;
 	};
 
 
-	return Sparks;
+	return Fireball;
 });

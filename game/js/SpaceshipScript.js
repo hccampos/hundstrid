@@ -161,7 +161,6 @@ define([
 
 	SpaceshipScript.prototype.explode = function () {
 		this._player.explosion.explode(this._velocity);
-		this._player.sparks.explode(this._velocity);
 	};
 
 	return SpaceshipScript;

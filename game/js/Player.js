@@ -5,6 +5,7 @@ define([
 	'js/SpaceshipScript',
 	'js/Thruster',
 	'js/Explosion',
+	'js/Fireball',
 	'js/Sparks'
 ], function (
 	Material,
@@ -13,6 +14,7 @@ define([
 	SpaceshipScript,
 	Thruster,
 	Explosion,
+	Fireball,
 	Sparks
 ) {
 	var KEY_LEFT = 37;
@@ -43,9 +45,6 @@ define([
 
 		this.explosion = new Explosion(this.game.world).addToWorld();
 		this.entity.attachChild(this.explosion);
-
-		this.sparks = new Sparks(this.game.world).addToWorld();
-		this.entity.attachChild(this.sparks);
 	}
 
 

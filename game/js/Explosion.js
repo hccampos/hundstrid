@@ -1,86 +1,57 @@
 define([
 	'goo/entities/Entity',
-	'goo/particles/ParticleInfluence',
-	'goo/particles/ParticleUtils',
-	'js/ParticleEntity'
+	'goo/entities/components/TransformComponent',
+	'js/Fireball',
+	'js/Sparks'
 ], function (
 	Entity,
-	ParticleInfluence,
-	ParticleUtils,
-	ParticleEntity
+	TransformComponent,
+	Fireball,
+	Sparks
 ) {
-	var SCALE = 100;
-	var PARTICLES_PER_SECOND = 3000;
-	var CUTTOFF_DURATION = 100;
-	var SPEED_SCALE = 300;
-
-	var EMITTER_SETTINGS = {
-		maxParticles: 5000,
-		minLifetime: 0.2,
-		maxLifetime: 1.2,
-		releaseRatePerSecond: 0,
-		timeline: [{
-			timeOffset: 0.0,
-			spin: 0,
-			mass: 1,
-			size: 5,
-			color: [0, 0, 0, 0]
-		},
-		{
-			timeOffset: 0.3,
-			size: 50,
-			color: [0.5, 0.1, 0.1, 0.9]
-		},
-		{
-			timeOffset: 0.9,
-			size: 60,
-			color: [0.3, 0.3, 0, 0.0]
-		}],
-		influences: [
-			new ParticleInfluence({
-				apply: function (tpf, particle, index) {
-					particle.velocity[0] *= 0.96;
-					particle.velocity[1] *= 0.96;
-					particle.velocity[2] *= 0.96;
-				}
-			})
-		]
-	};
-
-
 	/**
-	 * Creates a new explosion.
+	 * Creates a new explosion that combines a fireball with sparks.
 	 */
 	function Explosion(world, name, id) {
-		var that = this;
+		Entity.apply(this, arguments);
 
-		EMITTER_SETTINGS.getEmissionVelocity = function (particle, particleEntity) {
-			var vec3 = particle.velocity;
-			vec3.data[0] = that._velocity[0] + (Math.random() - 0.5) * SPEED_SCALE;
-			vec3.data[1] = (Math.random() - 0.5) * SPEED_SCALE;
-			vec3.data[2] = that._velocity[1] + (Math.random() - 0.5) * SPEED_SCALE;
-		};
+		var transformComponent = new TransformComponent();
+		this.setComponent(transformComponent);
 
-		ParticleEntity.call(this, world, name, id, EMITTER_SETTINGS); // Super
+		this._sparks = new Sparks(world).addToWorld();
+		this.attachChild(this._sparks);
 
-		this.setScale(SCALE, SCALE, SCALE);
+		this._fireball = new Fireball(world).addToWorld();
+		this.attachChild(this._fireball);
 
-		var material = ParticleEntity.createMaterial('ExplosionMaterial', 'assets/smoke.png', 2004);
-		this.meshRendererComponent.materials.push(material);
+		this._canExplode = true;
 	}
-	Explosion.prototype = Object.create(ParticleEntity.prototype);
+	Explosion.prototype = Object.create(Entity.prototype);
 	Explosion.prototype.constructor = Explosion;
 
 
 	Explosion.prototype.explode = function (velocity) {
-		this._velocity = velocity;
-		this._emitter.releaseRatePerSecond = PARTICLES_PER_SECOND;
+		if (!this._canExplode) {
+			return;
+		}
+
+		this._sparks.explode(velocity);
+		this._fireball.explode(velocity);
+		this._canExplode = false;
 
 		var that = this;
-		window.setTimeout(function () {
-			that._emitter.releaseRatePerSecond = 0;
-		}, CUTTOFF_DURATION);
+		this._canExplodeTimeout = window.setTimeout(function () {
+			window.clearTimeout(that._canExplodeTimeout);
+			that._canExplode = true;
+		}, this._getTimeoutDuration());
 	};
+
+
+	Explosion.prototype._getTimeoutDuration = function () {
+		var sparksDuration = this._sparks.getDuration();
+		var fireballDuration = this._fireball.getDuration();
+		return Math.max(fireballDuration, sparksDuration) * 1000;
+	}
 
 
 	return Explosion;
