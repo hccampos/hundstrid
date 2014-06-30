@@ -61,8 +61,8 @@ define([
 	Thruster.prototype.constructor = Thruster;
 
 
-	Thruster.prototype.start = function () {
-		this._emitter.releaseRatePerSecond = PARTICLES_PER_SECOND;
+	Thruster.prototype.start = function (strength) {
+		this._emitter.releaseRatePerSecond = PARTICLES_PER_SECOND * (strength || 0);
 	};
 
 

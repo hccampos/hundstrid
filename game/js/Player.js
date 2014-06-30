@@ -62,13 +62,18 @@ define([
 	 */
 	Player.prototype.applyCommand = function (command) {
 		var type = command.type;
-		var key = command.data.key;
 
-		for (var commandName in this.keyBindings) {
-			var binding = this.keyBindings[commandName];
+		if (this._isKeyCommand(command)) {
+			var key = command.data.key;
 
-			if (binding.type === type && binding.key === key)
-				this.ship.script[commandName](command.data);
+			for (var commandName in this.keyBindings) {
+				var binding = this.keyBindings[commandName];
+
+				if (binding.type === type && binding.key === key)
+					this.ship.script[commandName](command.data);
+			}
+		} else {
+			this.ship.script.setAnalogPosition(command.data);
 		}
 	};
 
@@ -140,6 +145,12 @@ define([
 		var pos = this.ship.getTranslation();
 		var bulletPos = bullet.getTranslation();
 		return pos.distance(bulletPos) <= 30;
+	};
+
+
+	Player.prototype._isKeyCommand = function (command) {
+		var isKeyType = command.type === 'keyup' || command.type === 'keydown';
+		return isKeyType && command.data && command.data.key;
 	};
 
 

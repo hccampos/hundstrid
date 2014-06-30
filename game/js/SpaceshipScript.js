@@ -7,8 +7,8 @@ define([
 ) {
 	'use strict';
 
-	var ACCELERATION = 800;
-	var ROTATION_SPEED = 22;
+	var ACCELERATION_FACTOR = 800;
+	var ROTATION_SPEED_FACTOR = 22;
 	var SPEED_REDUCTION_FACTOR = 0.98;
 	var ROTATION_REDUCTION_FACTOR = 0.85;
 	var BULLET_POS_OFFSET = 25;
@@ -29,6 +29,8 @@ define([
 		this._isRotatingRight = false;
 
 		this._bulletSpawnPos = new Vector3();
+
+		this._analogPosition = new Vector2();
 	}
 
 
@@ -43,11 +45,13 @@ define([
 		//------------
 		// Translation
 		//------------
-		if (this._isAccelerating) {
-			var xAcc = ACCELERATION * tpf * Math.sin(angle);
-			var yAcc = ACCELERATION * tpf * Math.cos(angle);
-			this._velocity.add([xAcc, yAcc]);
-		}
+		var acceleration = this._analogPosition[1];
+		if (this._isAccelerating) { acceleration += 1; }
+		acceleration = Math.min(1, acceleration);
+
+		var xAcc = acceleration * ACCELERATION_FACTOR * tpf * Math.sin(angle);
+		var yAcc = acceleration * ACCELERATION_FACTOR * tpf * Math.cos(angle);
+		this._velocity.add([xAcc, yAcc]);
 
 		this._velocity.mul(SPEED_REDUCTION_FACTOR);
 		Vector2.mul(this._velocity, tpf, this._posDif);
@@ -74,14 +78,17 @@ define([
 		//---------
 		// Rotation
 		//---------
+		var rotSpeedIncrement = -this._analogPosition[0];
 		if (this._isRotatingLeft) {
-			this._rotationSpeed += ROTATION_SPEED * tpf;
+			rotSpeedIncrement += 1;
 		}
 
 		if (this._isRotatingRight) {
-			this._rotationSpeed -= ROTATION_SPEED * tpf;
+			rotSpeedIncrement -= 1;
 		}
+		rotSpeedIncrement = Math.min(Math.max(rotSpeedIncrement, -1), 1);
 
+		this._rotationSpeed += rotSpeedIncrement * ROTATION_SPEED_FACTOR * tpf;
 		this._rotationSpeed *= ROTATION_REDUCTION_FACTOR;
 		entity.addRotation(0, this._rotationSpeed * tpf, 0);
 
@@ -134,7 +141,7 @@ define([
 
 	SpaceshipScript.prototype.startAccelerating = function () {
 		this._isAccelerating = true;
-		this._ship.thruster.start();
+		this._ship.thruster.start(1);
 	};
 
 
@@ -160,6 +167,13 @@ define([
 
 	SpaceshipScript.prototype.explode = function () {
 		this._ship.explosion.explode(this._velocity);
+	};
+
+
+	SpaceshipScript.prototype.setAnalogPosition = function (pos) {
+		this._analogPosition[0] = Math.min(Math.max(pos.x || 0, -1), 1);
+		this._analogPosition[1] = Math.min(Math.max(pos.y || 0, 0), 1);
+		this._ship.thruster.start(this._analogPosition[1]);
 	};
 
 

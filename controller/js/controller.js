@@ -1,4 +1,16 @@
-(function () {
+require([
+	'/socket.io/socket.io.js',
+	'js/Joystick'
+], function (
+	io,
+	Joystick
+) {
+	window.requestAnimationFrame =
+		window.requestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.msRequestAnimationFrame;
+
 	var gameData = {
 		gameId: null,
 		key: null
@@ -7,6 +19,7 @@
 	var socket = null;
 	var host = window.location.host;
 	var $window = $(window);
+	var joystick;
 
 	var GYRO_FREQUENCY = 20;
 	var CMD_ROTATE = 'rotate';
@@ -15,15 +28,28 @@
 	var CMD_MOUSE_MOVE = 'mousemove';
 	var CMD_MOUSE_DOWN = 'mousedown';
 	var CMD_MOUSE_UP = 'mouseup';
+	var CMD_ANALOG_POSITION = 'analogpos'
 
 	$(document).ready(function () {
 		socket = io.connect('http://' + host);
 
 		register();
 		addListeners();
+
+		joystick = new Joystick($('.joystick'));
+
+		window.requestAnimationFrame(update);
 	});
 
 	//--------------------------------------------------------------------------
+
+	function update(elapsedTime) {
+		joystick.update(elapsedTime);
+		sendCommand(CMD_ANALOG_POSITION, joystick.position);
+
+		window.requestAnimationFrame(update);
+	};
+
 
 	/**
 	 * Registers the player with the game.
@@ -48,17 +74,17 @@
 	 * Adds the event listeners that will collect data and send it to the game.
 	 */
 	function addListeners() {
-		$window.on('mousemove', onMouseMove);
-		$window.on('touchmove', onTouchMove);
+		//$window.on('mousemove', onMouseMove);
+		//$window.on('touchmove', onTouchMove);
 		$window.on('keydown', onKeyDown);
 		$window.on('keyup', onKeyUp);
-		$window.on('mousedown', onMouseDown);
-		$window.on('mousemove', onMouseMove);
+		//$window.on('mousedown', onMouseDown);
+		//$window.on('mousemove', onMouseMove);
 
-		if (gyro.hasFeature('devicemotion')) {
+		/*if (gyro.hasFeature('devicemotion')) {
 			gyro.frequency = GYRO_FREQUENCY;
 			gyro.startTracking(onDeviceMotion);
-		}
+		}*/
 	}
 
 
@@ -169,4 +195,4 @@
 
 		return params;
 	}
-})()
+});
