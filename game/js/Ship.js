@@ -98,8 +98,11 @@ define([
 
 	/**
 	 * Sets the color of the ship randomly.
+	 *
+	 * @param {Color} color
+	 *		The color which is to be set on the ship.
 	 */
-	Ship.prototype.randomizeColor = function () {
+	Ship.prototype.setColor = function (color) {
 		var shipBody = this._getShipBody();
 		if (!shipBody) {
 			return;
@@ -108,11 +111,7 @@ define([
 		var material = new Material();
 		material.shader = Material.createShader(ShaderLib.uber, 'Ship Material');
 
-		var r = Math.random() + 0.2;
-		var b = Math.random() + 0.2;
-		var g = Math.random() + 0.2;
-
-		material.uniforms.materialDiffuse = [r, g, b, 1];
+		material.uniforms.materialDiffuse = color.concat([]);
 		material.uniforms.materialAmbient = [0.0, 0.0, 0.0, 1];
 
 		shipBody.meshRendererComponent.materials = [material];

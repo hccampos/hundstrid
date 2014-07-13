@@ -2,14 +2,18 @@ define([
 	'goo/entities/Entity',
 	'goo/entities/EntityUtils',
 	'goo/entities/components/ScriptComponent',
+	'js/vendor/signals',
 	'js/Player',
-	'js/MatchScript'
+	'js/MatchScript',
+	'js/gui/ScoresWidget'
 ], function (
 	Entity,
 	EntityUtils,
 	ScriptComponent,
+	Signal,
 	Player,
-	MatchScript
+	MatchScript,
+	ScoresWidget
 ) {
 	function Game(goo) {
 		this.goo = goo;
@@ -19,6 +23,11 @@ define([
 		this._spaceship = null;
 		this._camera = null;
 		this._light = null;
+
+		this.playerAdded = new Signal();
+		this.playerRemoved = new Signal();
+
+		this.initGui();
 	}
 
 
@@ -54,11 +63,17 @@ define([
 	};
 
 
+	Game.prototype.initGui = function () {
+		this._scoresWidget = new ScoresWidget(this);
+		document.body.appendChild(this._scoresWidget.element);
+	};
+
+
 	Game.prototype.initConnections = function (socket) {
 		this.socket = socket;
-		socket.on('command', this.onCommand.bind(this));
-		socket.on('playerAdded', this.onPlayerConnected.bind(this));
-		socket.on('playerRemoved', this.onPlayerDisconnected.bind(this));
+		socket.on('command', this._onCommand.bind(this));
+		socket.on('playerAdded', this._onPlayerConnected.bind(this));
+		socket.on('playerRemoved', this._onPlayerDisconnected.bind(this));
 	};
 
 
@@ -68,8 +83,8 @@ define([
 	 * @param  {*} data
 	 *         The data received from the server.
 	 */
-	Game.prototype.onCommand = function (data) {
-		var player = this.getPlayerById(data ? data.playerId : null);
+	Game.prototype._onCommand = function (data) {
+		var player = this.getPlayerById(data ? data.id : null);
 		if (!player)
 			return;
 
@@ -89,8 +104,8 @@ define([
 	 *         The data received from the server which indicates which player
 	 *         was added.
 	 */
-	Game.prototype.onPlayerConnected = function (data) {
-		this.addPlayer(data ? data.playerId : null);
+	Game.prototype._onPlayerConnected = function (data) {
+		this.addPlayer(data);
 	};
 
 
@@ -101,32 +116,32 @@ define([
 	 *         The data received from the server which indicates which player
 	 *         was removed.
 	 */
-	Game.prototype.onPlayerDisconnected = function (data) {
-		this.removePlayerById(data ? data.playerId : null);
+	Game.prototype._onPlayerDisconnected = function (data) {
+		this.removePlayerById(data ? data.id : null);
 	};
 
 
 	/**
 	 * Adds a new player with the specified identifier.
 	 *
-	 * @param {string} id
-	 *        The identifier of the new player.
+	 * @param {object} playerData
+	 *        The data of the new player.
 	 */
-	Game.prototype.addPlayer = function (id) {
-		if (!id || typeof id !== 'string')
-			return;
-
+	Game.prototype.addPlayer = function (playerData) {
 		var ship = EntityUtils.clone(this.world, this._spaceship, function (e) {
 			return e;
 		});
 
-		var player = new Player(this, id, ship);
+		var id = playerData.id;
+		var name = playerData.name;
+
+		var player = new Player(this, playerData, ship);
 		this.players[id] = player;
 		this.playersArray.push(player);
 
 		player.spawn();
 
-		console.log('Player was added: ' + id);
+		this.playerAdded.dispatch(player);
 
 		return player;
 	};
@@ -150,7 +165,7 @@ define([
 
 		delete this.players[player.id];
 
-		console.log('Player was removed: ' + player.id);
+		this.playerRemoved.dispatch(player);
 
 		return this;
 	};

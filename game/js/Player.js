@@ -1,8 +1,10 @@
 define([
+	'js/vendor/signals',
 	'js/Ship',
 	'js/BulletManager',
 	'js/SpaceshipScript'
 ], function (
+	Signal,
 	Ship,
 	BulletManager,
 	SpaceshipScript
@@ -20,12 +22,37 @@ define([
 
 	/**
 	 * Creates a new player.
+	 *
+	 * @param {Game} game
+	 *		The game to which the player belongs.
+	 * @param {object} data
+	 *		The data of the player (e.g. id, name, etc).
+	 * @param {object} shipModel
+	 *		The entity which is to be used as a model for the player's ship.
 	 */
-	function Player(game, id, shipModel) {
-		this.id = id;
+	function Player(game, data, shipModel) {
+		this.id = data.id;
+		this.name = data.name;
+		this.color = getRandomColor();
 		this.game = game;
+		this.score = 0;
 		this.kills = 0;
+		this.health = 0;
 
+		this.nameChanged = new Signal();
+		this.killed = new Signal();
+		this.killsChanged = new Signal();
+		this.scoreChanged = new Signal();
+		this.healthChanged = new Signal();
+
+		this._init(shipModel);
+	}
+
+
+	/**
+	 * Initializes the player.
+	 */
+	Player.prototype._init = function (shipModel) {
 		this._setupDefaultKeyBindings();
 
 		var world = this.game.world;
@@ -34,7 +61,7 @@ define([
 
 		this.ship = new Ship(world).addToWorld();
 		this.ship.setModel(shipModel);
-		this.ship.randomizeColor();
+		this.ship.setColor(this.color);
 
 		var that = this;
 		var script = new SpaceshipScript(this.ship, this.bulletManager, function () {
@@ -51,7 +78,109 @@ define([
 	Player.prototype.destroy = function () {
 		this.ship.removeFromWorld();
 		this.ship = null;
+
+		this.nameChanged.removeAll();
+		this.killed.removeAll();
+		this.killsChanged.removeAll();
+		this.scoreChanged.removeAll();
+		this.healthChanged.removeAll();
 	};
+
+
+	Player.prototype.applyHits = function (bullets) {
+		// If the player is dead, it can't get hit anymore.
+		if (this.isDead()) { return; }
+
+		for (var i = 0; i < bullets.length; ++i) {
+			var bullet = bullets[i];
+
+			bullet.kill();
+			this.decrementHealth(bullet.damage);
+
+			if (this.isDead()) {
+				this.kill();
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+
+	Player.prototype.spawn = function () {
+		this.setHealth(FULL_HEALTH);
+		this.ship.spawn();
+	};
+
+
+	Player.prototype.kill = function () {
+		this.setHealth(0);
+		this.ship.kill();
+
+		this.killed.dispatch();
+
+		var that = this;
+		window.setTimeout(function () {
+			that.spawn();
+		}, RESPAWN_TIME);
+	};
+
+
+	Player.prototype.scoreKill = function () {
+		this.incrementKills();
+		this.incrementScore();
+	};
+
+
+	Player.prototype.isDead = function () {
+		return this.health <= 0;
+	};
+
+
+	Player.prototype.isCollision = function (bullet) {
+		var pos = this.ship.getTranslation();
+		var bulletPos = bullet.getTranslation();
+		return pos.distance(bulletPos) <= 30;
+	};
+
+
+	function createValueModifier(property, multiplier, defaultAmount) {
+		var setterName = 'set' + property.charAt(0).toUpperCase() + property.slice(1);
+
+		if (defaultAmount === undefined) { defaultAmount = 1; }
+		return function (amount) {
+			if (amount === undefined) { amount = defaultAmount; }
+			this[setterName](this[property] + amount * multiplier);
+		}
+	}
+
+
+	function createSetter(property) {
+		var signalName = property + 'Changed';
+
+		return function (value) {
+			var oldValue = this[property];
+			if (value !== oldValue) {
+				this[property] = value;
+				this[signalName].dispatch(value, oldValue);
+			}
+		}
+	}
+
+
+	Player.prototype.incrementKills = createValueModifier('kills', 1);
+	Player.prototype.decrementKills = createValueModifier('kills', -1);
+	Player.prototype.setKills = createSetter('kills');
+
+
+	Player.prototype.incrementScore = createValueModifier('score', 1);
+	Player.prototype.decrementScore = createValueModifier('score', -1);
+	Player.prototype.setScore = createSetter('score');
+
+
+	Player.prototype.incrementHealth = createValueModifier('health', 1);
+	Player.prototype.decrementHealth = createValueModifier('health', -1);
+	Player.prototype.setHealth = createSetter('health');
 
 
 	/**
@@ -61,6 +190,8 @@ define([
 	 *		The command which is to be applied.
 	 */
 	Player.prototype.applyCommand = function (command) {
+		if (this.isDead()) { return; }
+
 		var type = command.type;
 
 		if (this._isKeyCommand(command)) {
@@ -69,8 +200,9 @@ define([
 			for (var commandName in this.keyBindings) {
 				var binding = this.keyBindings[commandName];
 
-				if (binding.type === type && binding.key === key)
+				if (binding.type === type && binding.key === key) {
 					this.ship.script[commandName](command.data);
+				}
 			}
 		} else {
 			this.ship.script.setAnalogPosition(command.data);
@@ -91,60 +223,6 @@ define([
 			if (binding.action === action)
 				binding.key = key;
 		}
-	};
-
-
-	Player.prototype.applyHits = function (bullets) {
-		// If the player is dead, it can't get hit anymore.
-		if (this.isDead()) { return; }
-
-		for (var i = 0; i < bullets.length; ++i) {
-			var bullet = bullets[i];
-
-			bullet.kill();
-			this.health -= bullet.damage;
-
-			if (this.isDead()) {
-				this.kill();
-				return true;
-			}
-		}
-
-		return false;
-	};
-
-
-	Player.prototype.spawn = function () {
-		this.health = FULL_HEALTH;
-		this.ship.spawn();
-	};
-
-
-	Player.prototype.kill = function () {
-		this.health = 0;
-		this.ship.kill();
-
-		var that = this;
-		window.setTimeout(function () {
-			that.spawn();
-		}, RESPAWN_TIME);
-	};
-
-
-	Player.prototype.scoreKill = function () {
-		this.kills++;
-	};
-
-
-	Player.prototype.isDead = function () {
-		return this.health <= 0;
-	};
-
-
-	Player.prototype.isCollision = function (bullet) {
-		var pos = this.ship.getTranslation();
-		var bulletPos = bullet.getTranslation();
-		return pos.distance(bulletPos) <= 30;
 	};
 
 
@@ -198,6 +276,14 @@ define([
 			}
 		};
 	};
+
+
+	function getRandomColor() {
+		var r = Math.random() + 0.2;
+		var b = Math.random() + 0.2;
+		var g = Math.random() + 0.2;
+		return [r, g, b, 1]
+	}
 
 
 	return Player;

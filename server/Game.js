@@ -35,7 +35,7 @@ Game.prototype.sendCommand = function (command, player) {
 	data.command = command;
 
 	if (player)
-		data.playerId = player.id;
+		data.id = player.id;
 
 	this._socket.emit('command', data);
 };
@@ -51,7 +51,7 @@ Game.prototype.addPlayer = function (player) {
 	player.setGame(this);
 	this._players.push(player);
 
-	this._socket.emit('playerAdded', { playerId: player.id });
+	this._socket.emit('playerAdded', { id: player.id });
 };
 
 
@@ -66,7 +66,7 @@ Game.prototype.removePlayer = function (player) {
 	if (index > -1) {
 		player.setGame(null);
 		this._players.splice(index, 1);
-		this._socket.emit('playerRemoved', { playerId: player.id });
+		this._socket.emit('playerRemoved', { id: player.id });
 	}
 };
 

@@ -16,6 +16,7 @@ require([
 	var goo;
 	var loader;
 	var game;
+	var qrCodeElement;
 
 	init();
 
@@ -26,6 +27,8 @@ require([
 	 * Initializes the engine and the game.
 	 */
 	function init() {
+		qrCodeElement = document.getElementById('qr-code');
+
 		goo = new GooRunner({
 			antialias: true,
 			manuallyStartGameLoop: true,
@@ -123,8 +126,14 @@ require([
 
 
 	function setupLocalPlayers() {
-		var player1 = game.addPlayer('local');
-		var player2 = game.addPlayer('local2');
+		var player1 = game.addPlayer({
+			id: 'local1',
+			name: 'Player 1'
+		});
+		var player2 = game.addPlayer({
+			id: 'local2',
+			name: 'Player 2'
+		});
 
 		player2.setKeyForAction('rotateLeft', 65);
 		player2.setKeyForAction('rotateRight', 68);
@@ -132,16 +141,24 @@ require([
 		player2.setKeyForAction('shoot', 16);
 
 		document.addEventListener('keydown', function (event) {
-			game.onCommand({
-				playerId: 'local',
+			if (event.keyCode === 13) { // ENTER
+				if (qrCodeElement.classList.contains('show')) {
+					qrCodeElement.classList.remove('show');
+				} else {
+					qrCodeElement.classList.add('show');
+				}
+			}
+
+			game._onCommand({
+				id: 'local1',
 				command: {
 					type: 'keydown',
 					data: { key: event.key || event.keyCode }
 				}
 			});
 
-			game.onCommand({
-				playerId: 'local2',
+			game._onCommand({
+				id: 'local2',
 				command: {
 					type: 'keydown',
 					data: { key: event.key || event.keyCode }
@@ -150,16 +167,16 @@ require([
 		});
 
 		document.addEventListener('keyup', function (event) {
-			game.onCommand({
-				playerId: 'local',
+			game._onCommand({
+				id: 'local1',
 				command: {
 					type: 'keyup',
 					data: { key: event.key || event.keyCode }
 				}
 			});
 
-			game.onCommand({
-				playerId: 'local2',
+			game._onCommand({
+				id: 'local2',
 				command: {
 					type: 'keyup',
 					data: { key: event.key || event.keyCode }
@@ -197,7 +214,6 @@ require([
 	 *         The key used to authenticate players.
 	 */
 	function makeCode(id, key) {
-		var qrCodeElement = document.getElementById('qr-code');
 		var qrCode = new QRCode(qrCodeElement);
 
 		var baseUrl = getURL() + '/controller'
