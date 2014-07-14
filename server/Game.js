@@ -107,7 +107,12 @@ Game.prototype.getPlayerById = function (id) {
  *		True if the player is playing this game and false otherwise.
  */
 Game.prototype.hasPlayer = function (player) {
-	return !!_.find(this._players, function (p) { return p.id === player.id });
+	if (!player) { return false; }
+
+	return !!_.find(this._players, function (p) {
+		if (!p) { return false; }
+		return p.id === player.id;
+	});
 };
 
 

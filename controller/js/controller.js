@@ -28,7 +28,8 @@ require([
 	var CMD_MOUSE_MOVE = 'mousemove';
 	var CMD_MOUSE_DOWN = 'mousedown';
 	var CMD_MOUSE_UP = 'mouseup';
-	var CMD_ANALOG_POSITION = 'analogpos'
+	var CMD_ANALOG_POSITION = 'analogpos';
+	var CMD_SHOOT = 'shoot';
 
 	$(document).ready(function () {
 		socket = io.connect('http://' + host);
@@ -78,6 +79,21 @@ require([
 		//$window.on('touchmove', onTouchMove);
 		$window.on('keydown', onKeyDown);
 		$window.on('keyup', onKeyUp);
+
+		var eventName = 'mousedown';
+		if ('ontouchend' in document.documentElement) {
+			eventName = 'touchend';
+		}
+
+		$('.shoot-button').on(eventName, function () {
+			document.body.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+			sendCommand(CMD_SHOOT);
+		});
+
+		//document.mozRequestFullScreen();
+		//document.msRequestFullscreen();
+		//document.body.requestFullscreen();
+
 		//$window.on('mousedown', onMouseDown);
 		//$window.on('mousemove', onMouseMove);
 

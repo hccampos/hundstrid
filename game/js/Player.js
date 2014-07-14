@@ -204,6 +204,8 @@ define([
 					this.ship.script[commandName](command.data);
 				}
 			}
+		} else if (command.type === 'shoot') {
+			this.ship.script.shoot();
 		} else {
 			this.ship.script.setAnalogPosition(command.data);
 		}

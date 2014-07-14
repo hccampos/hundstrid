@@ -160,7 +160,7 @@ define([
 		player.destroy();
 
 		this.playersArray = this.playersArray.filter(function (p) {
-			return player === p;
+			return player !== p;
 		});
 
 		delete this.players[player.id];

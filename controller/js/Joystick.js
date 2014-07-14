@@ -83,22 +83,36 @@ define([
 
 
 	Joystick.prototype.onMouseUp = function (event) {
-		this._isDragging = false;
+		event.preventDefault();
+
+		// Only stop dragging if we are not shotting.
+		if (!event.target.classList.contains('shoot-button')) {
+			this._isDragging = false;
+		}
 	};
 
 
 	Joystick.prototype.onMouseDown = function (event) {
+		event.preventDefault();
+
 		this._isDragging = true;
 		this.setFromAbsolute(event.clientX, event.clientY);
 	};
 
 
 	Joystick.prototype.onMouseMove = function (event) {
+		event.preventDefault();
+
 		if (!this._isDragging) {
 			return;
 		}
 
-		this.setFromAbsolute(event.clientX, event.clientY);
+		if (event.originalEvent) { event = event.originalEvent; }
+
+		touch = event.touches ? event.touches[0] : null;
+		if (!touch) { touch = event; }
+
+		this.setFromAbsolute(touch.clientX, touch.clientY);
 	};
 
 
@@ -106,6 +120,10 @@ define([
 		$(document).on('mouseup', this.onMouseUp.bind(this));
 		this.element.on('mousedown', this.onMouseDown.bind(this));
 		$(document).on('mousemove', this.onMouseMove.bind(this));
+
+		$(document).on('touchend', this.onMouseUp.bind(this));
+		this.element.on('touchstart', this.onMouseDown.bind(this));
+		$(document).on('touchmove', this.onMouseMove.bind(this));
 	};
 
 	return Joystick;

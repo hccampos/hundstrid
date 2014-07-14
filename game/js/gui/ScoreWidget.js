@@ -51,7 +51,7 @@ define([
 	 */
 	ScoreWidget.prototype._setName = function () {
 		var player = this.player;
-		this.nameElement.innerHTML = player.name;
+		this.nameElement.innerHTML = player.name || '-';
 		this.nameElement.style.background = processColor(player.color, 0.35);
 	};
 

@@ -11,12 +11,24 @@ body {
 	overflow: hidden;
 }
 
+.unselectable {
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select: none;     /* Firefox all */
+	-ms-user-select: none;      /* IE 10+ */
+
+	/* No support for these yet, use at own risk */
+	-o-user-select: none;
+	user-select: none;
+}
+
 .joystick {
 	position: absolute;
-	right: 0;
-	bottom: 0;
+	top: 50%;
+	left: 75%;
 	width: 200px;
 	height: 200px;
+	margin-left: -100px;
+	margin-top: -100px;
 	background: #ccc;
 	border-radius: 9999px;
 	cursor: pointer !important;
@@ -30,4 +42,23 @@ body {
 	margin-top: -40px;
 	border-radius: 99px;
 	background: #eee;
+}
+
+.shoot-button {
+	width: 50%;
+	height: 100%;
+	background: #966e69;
+	outline: none;
+	border: none;
+}
+
+.shoot-button:active {
+	background: #7D5D59;
+}
+
+.shoot-button:hover, {
+.shoot-button:active,
+.shoot-button:focus {
+	outline: none;
+	border: none;
 }
