@@ -8,11 +8,11 @@ define([
 	'use strict';
 
 	var ACCELERATION_FACTOR = 800;
-	var ROTATION_SPEED_FACTOR = 22;
+	var ROTATION_SPEED_FACTOR = 35;
 	var SPEED_REDUCTION_FACTOR = 0.98;
 	var ROTATION_REDUCTION_FACTOR = 0.85;
-	var BULLET_POS_OFFSET = 25;
-
+	var BULLET_POS_OFFSET = 10;
+	var SECS_PER_SHOT = 0.2;
 
 	function SpaceshipScript(ship, bulletManager, getBounds) {
 		this._ship = ship;
@@ -20,18 +20,24 @@ define([
 		this._getBounds = getBounds;
 		this._entity = null;
 
+		this.reset();
+	}
+
+
+	SpaceshipScript.prototype.reset = function () {
 		this._velocity = new Vector2();
 		this._posDif = new Vector2();
 		this._rotationSpeed = 0;
 
+		this._timeSinceLastShot = 0;
+		this._isShooting = false;
 		this._isAccelerating = false;
 		this._isRotatingLeft = false;
 		this._isRotatingRight = false;
 
 		this._bulletSpawnPos = new Vector3();
-
 		this._analogPosition = new Vector2();
-	}
+	};
 
 
 	SpaceshipScript.prototype.run = function (entity, tpf, env) {
@@ -96,10 +102,15 @@ define([
 		// Bullets
 		//--------
 		this._bulletManager.update(tpf, bounds);
+
+		this._timeSinceLastShot += tpf;
 	};
 
 	SpaceshipScript.prototype.shoot = function () {
 		if (!this._entity)
+			return;
+
+		if (this._timeSinceLastShot < SECS_PER_SHOT)
 			return;
 
 		var dir = this._entity.getRotation()[1];
@@ -116,6 +127,8 @@ define([
 		var speed = Math.sqrt(x * x + y * y);
 
 		this._bulletManager.spawn(this._bulletSpawnPos, dir, speed);
+
+		this._timeSinceLastShot = 0;
 	};
 
 
@@ -167,6 +180,12 @@ define([
 
 	SpaceshipScript.prototype.explode = function () {
 		this._ship.explosion.explode(this._velocity);
+	};
+
+
+	SpaceshipScript.prototype.kill = function () {
+		this.reset();
+		this.explode();
 	};
 
 

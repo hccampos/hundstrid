@@ -7,40 +7,38 @@ define([
 	ParticleUtils,
 	ParticleEntity
 ) {
-	var SCALE = 1;
+	var SCALE = 0.5;
 	var PARTICLES_PER_SECOND = 300;
 
 	var EMITTER_SETTINGS = {
-		maxParticles: 5000,
+		maxParticles: 70,
 		minLifetime: 0.3,
-		maxLifetime: 0.3,
+		maxLifetime: 0.1,
 		releaseRatePerSecond: 0,
 		getEmissionPoint: function (particle, particleEntity) {
 			var vec3 = particle.position;
-			vec3.setd(0, 0, Math.random() * SCALE);
+			vec3.setd(0, -5, -Math.random() * SCALE);
 			return ParticleUtils.applyEntityTransformPoint(vec3, particleEntity);
 		},
 		getEmissionVelocity: function (particle, particleEntity) {
 			var vec3 = particle.velocity;
 
 			// Spread the particles a bit to make the effect look more natural.
-			vec3.data[0] = (Math.random() - 0.5) * SCALE * 100;
+			vec3.data[0] = (Math.random() - 0.5) * SCALE * 800;
 			vec3.data[1] = 0;
-			vec3.data[2] = Math.random() * SCALE * -120;
+			vec3.data[2] = Math.random() * SCALE * -100;
 
 			return ParticleUtils.applyEntityTransformVector(vec3, particleEntity);
 		},
 		timeline: [{
 			timeOffset: 0.0,
-			spin: 0,
 			mass: 1,
-			size: 8,
-			color: [1, 1, 1, 1]
+			size: 20 * SCALE,
+			color: [0.8, 0.8, 0, 0.2]
 		}, {
-			timeOffset: 1.0,
-			spin: 10,
-			size: 4.0,
-			color: [0, 0, 1, 0]
+			timeOffset: 0.8,
+			size: 0.1 * SCALE,
+			color: [0, 0, 0, 0]
 		}]
 	};
 

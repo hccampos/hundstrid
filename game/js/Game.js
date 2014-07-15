@@ -242,8 +242,8 @@ define([
 		var bottomRight = camera.getWorldPosition(w, h, w, h, distance);
 
 		this.bounds = {
-			minX: topLeft[0],
-			maxX: bottomRight[0],
+			minX: topLeft[0] - 20,
+			maxX: bottomRight[0] + 20,
 			minY: topLeft[2] - 20,
 			maxY: bottomRight[2] + 20
 		};

@@ -19,7 +19,7 @@ define([
 	MeshDataComponent,
 	MeshRendererComponent
 ) {
-	var SIZE = 30;
+	var SIZE = 10;
 	var SPEED = 700;
 	var X_ROTATION = -Math.PI / 2;
 	var DAMAGE = 100;

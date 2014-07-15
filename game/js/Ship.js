@@ -15,9 +15,6 @@ define([
 	Thruster,
 	Explosion
 ) {
-	var SHIP_SCALE = 0.8;
-
-
 	/**
 	 * Creates a new ship.
 	 */
@@ -75,7 +72,8 @@ define([
 	 * Kills the ship by hiding it.
 	 */
 	Ship.prototype.kill = function () {
-		this.script.explode();
+		this.script.kill();
+		this.thruster.stop();
 
 		var that = this;
 		window.setTimeout(function () {
@@ -91,7 +89,6 @@ define([
 		var x = Math.random() * 1000 - 250;
 		var y = Math.random() * 500 - 250;
 		this.setTranslation(x, 0, y);
-		this.setScale(SHIP_SCALE, SHIP_SCALE, SHIP_SCALE);
 		this.setRotation(0, 2 * Math.random() * Math.PI, 0);
 	};
 

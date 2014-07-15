@@ -18,6 +18,7 @@ define([
 
 	var FULL_HEALTH = 100;
 	var RESPAWN_TIME = 6000;
+	var SCALE = 0.4;
 
 
 	/**
@@ -38,6 +39,7 @@ define([
 		this.score = 0;
 		this.kills = 0;
 		this.health = 0;
+		this.scale = SCALE;
 
 		this.nameChanged = new Signal();
 		this.killed = new Signal();
@@ -57,11 +59,12 @@ define([
 
 		var world = this.game.world;
 
-		this.bulletManager = new BulletManager(world, 1000);
+		this.bulletManager = new BulletManager(world, 30);
 
 		this.ship = new Ship(world).addToWorld();
 		this.ship.setModel(shipModel);
 		this.ship.setColor(this.color);
+		this.ship.setScale(this.scale, this.scale, this.scale);
 
 		var that = this;
 		var script = new SpaceshipScript(this.ship, this.bulletManager, function () {
@@ -140,7 +143,7 @@ define([
 	Player.prototype.isCollision = function (bullet) {
 		var pos = this.ship.getTranslation();
 		var bulletPos = bullet.getTranslation();
-		return pos.distance(bulletPos) <= 30;
+		return pos.distance(bulletPos) <= 40 * this.scale;
 	};
 
 
@@ -281,9 +284,13 @@ define([
 
 
 	function getRandomColor() {
-		var r = Math.random() + 0.2;
-		var b = Math.random() + 0.2;
-		var g = Math.random() + 0.2;
+		function getComponent() {
+			return Math.min(0.6, Math.random() * 0.9 + 0.1);
+		}
+
+		var r = getComponent();
+		var b = getComponent();
+		var g = getComponent();
 		return [r, g, b, 1]
 	}
 

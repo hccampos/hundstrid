@@ -7,4 +7,4 @@ Class in the engine for loading:
 http://code.gooengine.com/latest/docs/DynamicLoader.html
 
 Tutorials:
-http://www.gootechnologies.com/learn/tutorials/
+http://www.goocreate.com/learn/tutorials/
