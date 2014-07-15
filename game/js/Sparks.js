@@ -9,7 +9,7 @@ define([
 	ParticleUtils,
 	ParticleEntity
 ) {
-	var SCALE = 100;
+	var SCALE = 1;
 	var PARTICLES_PER_SECOND = 2000;
 	var CUTTOFF_DURATION_SECS = 0.1;
 	var MAX_LIFETIME_SECS = 1;
@@ -24,16 +24,16 @@ define([
 			timeOffset: 0.0,
 			spin: 0,
 			mass: 1,
-			size: 1,
+			size: 1 * SCALE,
 			color: [0, 0, 0, 0]
 		},
 		{
 			timeOffset: 0.1,
-			size: 2,
-			color: [1, 1, 1, 1.0]
+			size: 1 * SCALE,
+			color: [1, 1, 1, 1]
 		},
 		{
-			timeOffset: 1.0,
+			timeOffset: 0.8,
 			color: [1, 1, 1, 0.0]
 		}],
 		influences: [

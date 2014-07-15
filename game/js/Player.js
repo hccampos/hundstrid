@@ -278,6 +278,11 @@ define([
 				type: 'keyup',
 				key: KEY_SPACE,
 				action: 'shoot'
+			},
+			explode: {
+				type: 'keyup',
+				key: KEY_DOWN,
+				action: 'explode'
 			}
 		};
 	};

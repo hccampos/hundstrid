@@ -17,7 +17,7 @@ define([
 
 	var EMITTER_SETTINGS = {
 		maxParticles: 5000,
-		minLifetime: 0.2,
+		minLifetime: 0.6,
 		maxLifetime: MAX_LIFETIME_SECS,
 		releaseRatePerSecond: 0,
 		timeline: [{
@@ -28,21 +28,21 @@ define([
 			color: [0, 0, 0, 0]
 		},
 		{
-			timeOffset: 0.3,
-			size: 50 * SCALE,
-			color: [0.5, 0.1, 0.1, 0.9]
+			timeOffset: 0.05,
+			size: 30 * SCALE,
+			color: [0.6, 0.6, 0.3, 0.3]
 		},
 		{
-			timeOffset: 0.9,
+			timeOffset: 0.6,
 			size: 60 * SCALE,
-			color: [0.3, 0.3, 0, 0.0]
+			color: [0, 0, 0, 0.0]
 		}],
 		influences: [
 			new ParticleInfluence({
 				apply: function (tpf, particle, index) {
-					particle.velocity[0] *= 0.96;
-					particle.velocity[1] *= 0.96;
-					particle.velocity[2] *= 0.96;
+					particle.velocity[0] *= 0.93;
+					particle.velocity[1] *= 0.93;
+					particle.velocity[2] *= 0.93;
 				}
 			})
 		]
@@ -66,7 +66,9 @@ define([
 
 		this.setScale(SCALE, SCALE, SCALE);
 
-		var material = ParticleEntity.createMaterial('FireballMaterial', 'assets/smoke.png', 2004);
+		var material = ParticleEntity.createMaterial('FireballMaterial', 'assets/explosion.png', 2004);
+		var blendState = material.blendState;
+		//blendState.blending = 'CustomBlending';
 		this.meshRendererComponent.materials.push(material);
 	}
 	Fireball.prototype = Object.create(ParticleEntity.prototype);
