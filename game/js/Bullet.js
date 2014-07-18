@@ -47,7 +47,7 @@ define([
 		var transformComponent = new TransformComponent();
 		transformComponent.setTranslation(0, 0, 0);
 		transformComponent.setRotation(X_ROTATION, 0, 0);
-		transformComponent.setScale(SIZE, SIZE / 2, 1);
+		transformComponent.setScale(SIZE * 2, SIZE / 3, 1);
 		this.setComponent(transformComponent);
 
 		var meshDataComponent = new MeshDataComponent(meshData);

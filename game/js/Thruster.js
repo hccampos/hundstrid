@@ -11,9 +11,9 @@ define([
 	var PARTICLES_PER_SECOND = 300;
 
 	var EMITTER_SETTINGS = {
-		maxParticles: 70,
-		minLifetime: 0.3,
-		maxLifetime: 0.1,
+		maxParticles: 400,
+		minLifetime: 0.5,
+		maxLifetime: 1,
 		releaseRatePerSecond: 0,
 		getEmissionPoint: function (particle, particleEntity) {
 			var vec3 = particle.position;
@@ -24,7 +24,7 @@ define([
 			var vec3 = particle.velocity;
 
 			// Spread the particles a bit to make the effect look more natural.
-			vec3.data[0] = (Math.random() - 0.5) * SCALE * 800;
+			vec3.data[0] = (Math.random() - 0.5) * SCALE * 100;
 			vec3.data[1] = 0;
 			vec3.data[2] = Math.random() * SCALE * -100;
 
@@ -33,11 +33,11 @@ define([
 		timeline: [{
 			timeOffset: 0.0,
 			mass: 1,
-			size: 20 * SCALE,
-			color: [0.8, 0.8, 0, 0.2]
+			size: 10 * SCALE,
+			color: [1, 1, 1, 0.1]
 		}, {
-			timeOffset: 0.8,
-			size: 0.1 * SCALE,
+			timeOffset: 1,
+			size: 60 * SCALE,
 			color: [0, 0, 0, 0]
 		}]
 	};

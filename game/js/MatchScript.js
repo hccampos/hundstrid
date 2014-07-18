@@ -9,6 +9,7 @@ define([
 	MatchScript.prototype.run = function (entity, tpf, env) {
 		var players = this.game.playersArray;
 		var numPlayers = players.length;
+		var planetPosition = this.game.planet.getTranslation();
 
 		for (var i = 0; i < numPlayers; ++i) {
 			var shootingPlayer = players[i];
@@ -31,6 +32,17 @@ define([
 						shootingPlayer.scoreKill();
 					}
 				}
+
+				var bothAlive = shootingPlayer.isAlive() && player.isAlive();
+				if (i !== j && shootingPlayer.isEnemyCollision(player) && bothAlive) {
+					shootingPlayer.kill();
+					player.kill();
+				}
+			}
+
+			var position = shootingPlayer.ship.getTranslation();
+			if (shootingPlayer.isAlive() && position.distance(planetPosition) <= 55) {
+				shootingPlayer.kill();
 			}
 		}
 	};

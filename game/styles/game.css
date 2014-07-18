@@ -24,6 +24,7 @@ body {
 	border: solid 15px #fff;
 	z-index: 10;
 	opacity: 0;
+	pointer-events: none;
 
 	-webkit-transform: scale(0.5, 0.5);
 	-moz-transform: scale(0.5, 0.5);
@@ -44,6 +45,7 @@ body {
 
 #qr-code.show {
 	opacity: 1;
+	pointer-events: auto;
 	-webkit-transform: scale(1, 1);
 	-moz-transform: scale(1, 1);
 	-ms-transform: scale(1, 1);

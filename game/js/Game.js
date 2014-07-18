@@ -5,6 +5,7 @@ define([
 	'js/vendor/signals',
 	'js/Player',
 	'js/MatchScript',
+	'js/PlanetScript',
 	'js/gui/ScoresWidget'
 ], function (
 	Entity,
@@ -13,6 +14,7 @@ define([
 	Signal,
 	Player,
 	MatchScript,
+	PlanetScript,
 	ScoresWidget
 ) {
 	function Game(goo) {
@@ -20,9 +22,29 @@ define([
 		this.world = goo.world;
 		this.players = {};
 		this.playersArray = [];
+		this.planet = null;
 		this._spaceship = null;
 		this._camera = null;
 		this._light = null;
+
+		this._colors = [
+			[97, 71, 150],
+			[255, 78, 74],
+			[138, 107, 47],
+			[93, 161, 35],
+			[51, 150, 150],
+			[51, 150, 150],
+			[255, 91, 29],
+			[238, 252, 30]
+		];
+
+		for (var i = 0; i < this._colors.length; ++i) {
+			var color = this._colors[i];
+			color[0] /= 255.0;
+			color[1] /= 255.0;
+			color[2] /= 255.0;
+			color.push(255);
+		}
 
 		this.playerAdded = new Signal();
 		this.playerRemoved = new Signal();
@@ -49,6 +71,9 @@ define([
 		this._spaceship = this.world.by.name('spaceship').toArray()[0];
 		this._camera = this.world.by.name('camera').toArray()[0];
 		this._light = this.world.by.name('light_1').toArray()[0];
+		this.planet = this.world.by.name('planet').toArray()[0];
+
+		this.planet.setComponent(new ScriptComponent(new PlanetScript()));
 
 		// Remove the spaceship from the world because we only need it to create
 		// clones. We won't actually control it or display it.
@@ -134,6 +159,7 @@ define([
 
 		var id = playerData.id;
 		var name = playerData.name;
+		playerData.color = this._getAvailableColor();
 
 		var player = new Player(this, playerData, ship);
 		this.players[id] = player;
@@ -162,6 +188,8 @@ define([
 		this.playersArray = this.playersArray.filter(function (p) {
 			return player !== p;
 		});
+
+		this._colors.push(player.color);
 
 		delete this.players[player.id];
 
@@ -252,6 +280,20 @@ define([
 	};
 
 	//--------------------------------------------------------------------------
+
+
+	Game.prototype._getAvailableColor = function () {
+		if (this._colors.length === 0) {
+			return [0, 0, 0, 1];
+		}
+
+		var maxIndex = Math.max(0, this._colors.length - 1);
+		var index = Math.round(Math.random() * maxIndex);
+		var color = this._colors[index];
+		this._colors.splice(index, 1);
+
+		return color;
+	};
 
 	return Game;
 });

@@ -18,7 +18,7 @@ define([
 
 	var FULL_HEALTH = 100;
 	var RESPAWN_TIME = 6000;
-	var SCALE = 0.4;
+	var SCALE = 0.5;
 
 
 	/**
@@ -34,7 +34,7 @@ define([
 	function Player(game, data, shipModel) {
 		this.id = data.id;
 		this.name = data.name;
-		this.color = getRandomColor();
+		this.color = data.color;
 		this.game = game;
 		this.score = 0;
 		this.kills = 0;
@@ -140,10 +140,22 @@ define([
 	};
 
 
+	Player.prototype.isAlive = function () {
+		return this.health > 0;
+	};
+
+
 	Player.prototype.isCollision = function (bullet) {
 		var pos = this.ship.getTranslation();
 		var bulletPos = bullet.getTranslation();
 		return pos.distance(bulletPos) <= 40 * this.scale;
+	};
+
+
+	Player.prototype.isEnemyCollision = function (enemy) {
+		var pos = this.ship.getTranslation();
+		var enemyPos = enemy.ship.getTranslation();
+		return pos.distance(enemyPos) <= 40 * this.scale;
 	};
 
 
@@ -286,18 +298,6 @@ define([
 			}
 		};
 	};
-
-
-	function getRandomColor() {
-		function getComponent() {
-			return Math.min(0.6, Math.random() * 0.9 + 0.1);
-		}
-
-		var r = getComponent();
-		var b = getComponent();
-		var g = getComponent();
-		return [r, g, b, 1]
-	}
 
 
 	return Player;
