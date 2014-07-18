@@ -3,13 +3,15 @@ require([
 	'goo/entities/GooRunner',
 	'goo/loaders/DynamicLoader',
 	'socket.io/socket.io',
-	'js/Game'
+	'js/Game',
+	'js/GamepadManager'
 ], function (
 	RSVP,
 	GooRunner,
 	DynamicLoader,
 	io,
-	Game
+	Game,
+	GamepadManager
 ) {
 	"use strict";
 
@@ -126,6 +128,8 @@ require([
 
 
 	function setupLocalPlayers() {
+		var gamepadManager = new GamepadManager(game);
+
 		var player1 = game.addPlayer({
 			id: 'local1',
 			name: 'Player 1'

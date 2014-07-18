@@ -12,6 +12,15 @@ body {
 	font-family: 'Open Sans', sans-serif;
 }
 
+#logo {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	width: 180px;
+	z-index: 900;
+	opacity: 0.8;
+}
+
 #qr-code {
 	display: block;
 	position: absolute;
@@ -93,9 +102,9 @@ body {
 
 .score > label {
 	padding: 0 15px;
-	width: 90px;
+	width: 150px;
 	background: rgba(255, 255, 255, 0.3);
-	font-size: 16px;
+	font-size: 15px;
 	font-weight: 300;
 	line-height: 42px;
 	text-transform: uppercase;

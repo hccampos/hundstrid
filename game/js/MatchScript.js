@@ -24,10 +24,10 @@ define([
 				}
 
 				var predicate = player.isCollision.bind(player);
-				var collidingBullets = bulletManager.getCollidingBullets(predicate);
+				var bulletsCollidingWithPlayer = bulletManager.getCollidingBullets(predicate);
 
-				if (collidingBullets.length > 0) {
-					var killed = player.applyHits(collidingBullets);
+				if (bulletsCollidingWithPlayer.length > 0) {
+					var killed = player.applyHits(bulletsCollidingWithPlayer);
 					if (killed) {
 						shootingPlayer.scoreKill();
 					}
@@ -43,6 +43,16 @@ define([
 			var position = shootingPlayer.ship.getTranslation();
 			if (shootingPlayer.isAlive() && position.distance(planetPosition) <= 55) {
 				shootingPlayer.kill();
+			}
+
+			var bulletsCollidingWithPlanet = bulletManager.getCollidingBullets(function (bullet) {
+				var bulletPos = bullet.getTranslation();
+				return planetPosition.distance(bulletPos) <= 60;
+			});
+
+			for (b = 0; b < bulletsCollidingWithPlanet.length; ++b) {
+				var bullet = bulletsCollidingWithPlanet[b];
+				bullet.kill();
 			}
 		}
 	};
