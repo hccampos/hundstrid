@@ -13,30 +13,39 @@ define([
 	var ROTATION_REDUCTION_FACTOR = 0.85;
 	var BULLET_POS_OFFSET = 10;
 	var SECS_PER_SHOT = 0.2;
+	var GRAVITY = 30000;
 
-	function SpaceshipScript(ship, bulletManager, getBounds) {
+	function SpaceshipScript(ship, bulletManager, planet, getBounds) {
 		this._ship = ship;
 		this._bulletManager = bulletManager;
+		this._planet = planet;
 		this._getBounds = getBounds;
 		this._entity = null;
+
+		this._velocity = new Vector3();
+		this._acceleration = new Vector3();
+		this._posDif = new Vector3();
+		this._gravity = new Vector3();
+		this._bulletSpawnPos = new Vector3();
+		this._analogPosition = new Vector3();
 
 		this.reset();
 	}
 
 
 	SpaceshipScript.prototype.reset = function () {
-		this._velocity = new Vector2();
-		this._posDif = new Vector2();
 		this._rotationSpeed = 0;
-
 		this._timeSinceLastShot = 0;
 		this._isShooting = false;
 		this._isAccelerating = false;
 		this._isRotatingLeft = false;
 		this._isRotatingRight = false;
-
-		this._bulletSpawnPos = new Vector3();
-		this._analogPosition = new Vector2();
+		this._velocity.setd(0, 0, 0);
+		this._acceleration.setd(0, 0, 0);
+		this._posDif.setd(0, 0, 0);
+		this._gravity.setd(0, 0, 0);
+		this._bulletSpawnPos.setd(0, 0, 0);
+		this._analogPosition.setd(0, 0, 0);
 	};
 
 
@@ -55,15 +64,43 @@ define([
 		if (this._isAccelerating) { acceleration += 1; }
 		acceleration = Math.min(1, acceleration);
 
-		var xAcc = acceleration * ACCELERATION_FACTOR * tpf * Math.sin(angle);
-		var yAcc = acceleration * ACCELERATION_FACTOR * tpf * Math.cos(angle);
-		this._velocity.add([xAcc, yAcc]);
+		var factor = acceleration * ACCELERATION_FACTOR * tpf;
+		this._acceleration.set(factor * Math.sin(angle), factor * Math.cos(angle), 0);
 
-		this._velocity.mul(SPEED_REDUCTION_FACTOR);
-		Vector2.mul(this._velocity, tpf, this._posDif);
-		entity.addTranslation(this._posDif[0], 0, this._posDif[1]);
-
+		// Apply gravity due to the planet.
 		var t = entity.getTranslation();
+		var plannetPos = this._planet.getTranslation();
+		var dist = plannetPos.distance(t);
+		var g = GRAVITY / (dist * dist);
+
+		//console.log(g);
+
+		var gravity = this._gravity;
+		gravity.setv(plannetPos);
+		gravity.subv(t); // Vector from the ship to the planet.
+		gravity.normalize(); // Turns into a direction vector.
+		gravity.muld(g, g, g); // Becomes the gravity vector.
+
+		var tmp = gravity[1];
+		gravity[1] = gravity[2];
+		gravity[2] = tmp;
+
+		//console.log('[', + gravity[0] + ',' + gravity[1] + ',' + gravity[2] + ']')
+
+		var v = this._velocity;
+		v.addv(this._acceleration); // Apply thrust.
+		v.addv(gravity); // Apply gravity.
+		v.muld(
+			SPEED_REDUCTION_FACTOR,
+			SPEED_REDUCTION_FACTOR,
+			SPEED_REDUCTION_FACTOR
+		);
+
+		var dif = this._posDif;
+		dif.setd(v[0] * tpf, v[1] * tpf, v[2] * tpf);
+		entity.addTranslation(dif[0], 0, dif[1]);
+
+		t = entity.getTranslation();
 		var bounds = this._getBounds();
 		if (t[0] > bounds.maxX) {
 			entity.setTranslation(bounds.minX + 1, t[1], t[2]);
@@ -102,7 +139,6 @@ define([
 		// Bullets
 		//--------
 		this._bulletManager.update(tpf, bounds);
-
 		this._timeSinceLastShot += tpf;
 	};
 

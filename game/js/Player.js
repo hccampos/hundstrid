@@ -67,7 +67,7 @@ define([
 		this.ship.setScale(this.scale, this.scale, this.scale);
 
 		var that = this;
-		var script = new SpaceshipScript(this.ship, this.bulletManager, function () {
+		var script = new SpaceshipScript(this.ship, this.bulletManager, this.game.planet, function () {
 			return that.game.bounds;
 		});
 
