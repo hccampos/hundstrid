@@ -20,7 +20,7 @@ define([
 	MeshRendererComponent
 ) {
 	var SIZE = 10;
-	var SPEED = 700;
+	var SPEED = 600;
 	var X_ROTATION = -Math.PI / 2;
 	var DAMAGE = 100;
 

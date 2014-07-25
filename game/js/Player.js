@@ -17,7 +17,7 @@ define([
 	var KEY_SPACE = 32;
 
 	var FULL_HEALTH = 100;
-	var RESPAWN_TIME = 6000;
+	var RESPAWN_TIME = 2000;
 	var SCALE = 0.5;
 
 
@@ -36,6 +36,7 @@ define([
 		this.name = data.name;
 		this.color = data.color;
 		this.game = game;
+		this.gamepad = data.gamepad;
 		this.score = 0;
 		this.kills = 0;
 		this.health = 0;
@@ -67,9 +68,13 @@ define([
 		this.ship.setScale(this.scale, this.scale, this.scale);
 
 		var that = this;
-		var script = new SpaceshipScript(this.ship, this.bulletManager, this.game.planet, function () {
-			return that.game.bounds;
-		});
+		var script = new SpaceshipScript(
+			this.gamepad,
+			this.ship,
+			this.bulletManager,
+			this.game.planet,
+			function () { return that.game.bounds; }
+		);
 
 		this.ship.setScript(script);
 	}
@@ -81,6 +86,7 @@ define([
 	Player.prototype.destroy = function () {
 		this.ship.removeFromWorld();
 		this.ship = null;
+		this.gamepad = null;
 
 		this.nameChanged.removeAll();
 		this.killed.removeAll();

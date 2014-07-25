@@ -81,8 +81,8 @@ define([
 
 		// Put a match script inside of an entity.
 		this.matchScript = new MatchScript(this);
-		var matchEntity = new Entity(this.world).addToWorld();
-		matchEntity.setComponent(new ScriptComponent(this.matchScript));
+		var gameEntity = new Entity(this.world).addToWorld();
+		gameEntity.setComponent(new ScriptComponent(this.matchScript));
 
 		return configs;
 	};

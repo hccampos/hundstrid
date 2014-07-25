@@ -1,26 +1,28 @@
 define([
-	'goo/math/Vector2',
-	'goo/math/Vector3'
+	'goo/math/Vector3',
+	'js/input/Gamepad'
 ], function (
-	Vector2,
-	Vector3
+	Vector3,
+	Gamepad
 ) {
 	'use strict';
 
-	var ACCELERATION_FACTOR = 800;
+	var ACCELERATION_FACTOR = 700;
 	var ROTATION_SPEED_FACTOR = 35;
 	var SPEED_REDUCTION_FACTOR = 0.98;
 	var ROTATION_REDUCTION_FACTOR = 0.85;
 	var BULLET_POS_OFFSET = 10;
-	var SECS_PER_SHOT = 0.2;
+	var SECS_PER_SHOT = 0.02;
 	var GRAVITY = 30000;
 
-	function SpaceshipScript(ship, bulletManager, planet, getBounds) {
+	function SpaceshipScript(gamepad, ship, bulletManager, planet, getBounds) {
+		this._gamepad = gamepad;
 		this._ship = ship;
 		this._bulletManager = bulletManager;
 		this._planet = planet;
 		this._getBounds = getBounds;
 		this._entity = null;
+		this._dead = false;
 
 		this._velocity = new Vector3();
 		this._acceleration = new Vector3();
@@ -55,6 +57,10 @@ define([
 			return;
 		}
 
+		if (this._gamepad) {
+			this.updateGamepad();
+		}
+
 		var angle = entity.getRotation()[1];
 
 		//------------
@@ -62,7 +68,7 @@ define([
 		//------------
 		var acceleration = this._analogPosition[1];
 		if (this._isAccelerating) { acceleration += 1; }
-		acceleration = Math.min(1, acceleration);
+		acceleration = Math.min(1, Math.max(0, acceleration));
 
 		var factor = acceleration * ACCELERATION_FACTOR * tpf;
 		this._acceleration.set(factor * Math.sin(angle), factor * Math.cos(angle), 0);
@@ -71,9 +77,9 @@ define([
 		var t = entity.getTranslation();
 		var plannetPos = this._planet.getTranslation();
 		var dist = plannetPos.distance(t);
-		var g = GRAVITY / (dist * dist);
-
-		//console.log(g);
+		var g = 1;
+		if (dist > 0)
+			g = Math.min(100, GRAVITY / (dist * dist));
 
 		var gravity = this._gravity;
 		gravity.setv(plannetPos);
@@ -84,8 +90,6 @@ define([
 		var tmp = gravity[1];
 		gravity[1] = gravity[2];
 		gravity[2] = tmp;
-
-		//console.log('[', + gravity[0] + ',' + gravity[1] + ',' + gravity[2] + ']')
 
 		var v = this._velocity;
 		v.addv(this._acceleration); // Apply thrust.
@@ -142,11 +146,36 @@ define([
 		this._timeSinceLastShot += tpf;
 	};
 
-	SpaceshipScript.prototype.shoot = function () {
-		if (!this._entity)
-			return;
 
-		if (this._timeSinceLastShot < SECS_PER_SHOT)
+	SpaceshipScript.prototype.updateGamepad = function () {
+		if (this._dead) { return; }
+
+		var gamepad = this._gamepad;
+		gamepad.update();
+
+		if (gamepad.isButtonPressed(Gamepad.BUTTONS.X) ||
+			gamepad.isRightTriggerActive()) {
+			this.startShooting();
+		} else {
+			this.stopShooting();
+		}
+
+		var x = gamepad.getAxisValue(Gamepad.AXES.LEFT_H);
+		var y = gamepad.getButtonValue(Gamepad.BUTTONS.LEFT_TRIGGER);
+		console.log(y);
+
+		this._analogPosition[0] = Math.min(Math.max(x || 0, -1), 1);
+		this._analogPosition[1] = Math.min(Math.max(y || 0, 0), 1);
+		this._ship.thruster.start(this._analogPosition[1]);
+	};
+
+
+	/**
+	 * Shoots a new bullet if the player can shoot one (i.e. enough time has
+	 * passed since the last shot).
+	 */
+	SpaceshipScript.prototype.shoot = function () {
+		if (!this._entity || this._dead || this._timeSinceLastShot < SECS_PER_SHOT)
 			return;
 
 		var dir = this._entity.getRotation()[1];
@@ -154,9 +183,9 @@ define([
 		var cos = Math.cos(dir);
 
 		var pos = this._entity.getTranslation();
-		this._bulletSpawnPos[0] = pos[0] + sin * BULLET_POS_OFFSET;
+		this._bulletSpawnPos[0] = pos[0]; + sin * BULLET_POS_OFFSET;
 		this._bulletSpawnPos[1] = pos[1];
-		this._bulletSpawnPos[2] = pos[2] + cos * BULLET_POS_OFFSET;
+		this._bulletSpawnPos[2] = pos[2]; + cos * BULLET_POS_OFFSET;
 
 		var x = this._velocity[0] * sin;
 		var y = this._velocity[1] * cos;
@@ -169,6 +198,7 @@ define([
 
 
 	SpaceshipScript.prototype.startRotatingLeft = function () {
+		if (this._dead) { return; }
 		this._isRotatingLeft = true;
 	};
 
@@ -179,6 +209,7 @@ define([
 
 
 	SpaceshipScript.prototype.startRotatingRight = function () {
+		if (this._dead) { return; }
 		this._isRotatingRight = true;
 	};
 
@@ -189,6 +220,7 @@ define([
 
 
 	SpaceshipScript.prototype.startAccelerating = function () {
+		if (this._dead) { return; }
 		this._isAccelerating = true;
 		this._ship.thruster.start(1);
 	};
@@ -201,8 +233,7 @@ define([
 
 
 	SpaceshipScript.prototype.startShooting = function () {
-		if (this._isShooting)
-			return;
+		if (this._dead || this._isShooting) { return; }
 
 		this.shoot();
 		this._isShooting = true;
@@ -219,13 +250,20 @@ define([
 	};
 
 
+	SpaceshipScript.prototype.spawn = function () {
+		this._dead = false;
+	};
+
+
 	SpaceshipScript.prototype.kill = function () {
+		this._dead = true;
 		this.reset();
 		this.explode();
 	};
 
 
 	SpaceshipScript.prototype.setAnalogPosition = function (pos) {
+		if (this._dead) { return; }
 		this._analogPosition[0] = Math.min(Math.max(pos.x || 0, -1), 1);
 		this._analogPosition[1] = Math.min(Math.max(pos.y || 0, 0), 1);
 		this._ship.thruster.start(this._analogPosition[1]);

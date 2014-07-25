@@ -4,7 +4,7 @@ require([
 	'goo/loaders/DynamicLoader',
 	'socket.io/socket.io',
 	'js/Game',
-	'js/GamepadManager'
+	'js/input/GamepadManager'
 ], function (
 	RSVP,
 	GooRunner,
@@ -130,11 +130,11 @@ require([
 	function setupLocalPlayers() {
 		var gamepadManager = new GamepadManager(game);
 
-		var player1 = game.addPlayer({
+		/*var player1 = game.addPlayer({
 			id: 'local1',
 			name: 'Player 1'
-		});
-		var player2 = game.addPlayer({
+		});*/
+		/*var player2 = game.addPlayer({
 			id: 'local2',
 			name: 'Player 2'
 		});
@@ -142,7 +142,7 @@ require([
 		player2.setKeyForAction('rotateLeft', 65);
 		player2.setKeyForAction('rotateRight', 68);
 		player2.setKeyForAction('accelerate', 87);
-		player2.setKeyForAction('shoot', 16);
+		player2.setKeyForAction('shoot', 16);*/
 
 		document.addEventListener('keydown', function (event) {
 			if (event.keyCode === 13) { // ENTER
@@ -153,39 +153,39 @@ require([
 				}
 			}
 
-			game._onCommand({
+			/*game._onCommand({
 				id: 'local1',
 				command: {
 					type: 'keydown',
 					data: { key: event.key || event.keyCode }
 				}
-			});
+			});*/
 
-			game._onCommand({
+			/*game._onCommand({
 				id: 'local2',
 				command: {
 					type: 'keydown',
 					data: { key: event.key || event.keyCode }
 				}
-			});
+			});*/
 		});
 
 		document.addEventListener('keyup', function (event) {
-			game._onCommand({
+			/*game._onCommand({
 				id: 'local1',
 				command: {
 					type: 'keyup',
 					data: { key: event.key || event.keyCode }
 				}
-			});
+			});*/
 
-			game._onCommand({
+			/*game._onCommand({
 				id: 'local2',
 				command: {
 					type: 'keyup',
 					data: { key: event.key || event.keyCode }
 				}
-			});
+			});*/
 		});
 	}
 

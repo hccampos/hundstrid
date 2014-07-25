@@ -65,6 +65,7 @@ define([
 	Ship.prototype.spawn = function () {
 		this.randomizeTransform();
 		this.model.show();
+		this.script.spawn();
 	};
 
 
