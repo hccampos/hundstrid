@@ -31,6 +31,12 @@ define([
 		this._bulletSpawnPos = new Vector3();
 		this._analogPosition = new Vector3();
 
+		this._sounds = [];
+		for (var i = 0; i < 10; ++i) {
+			this._sounds.push(new Audio('assets/laser.wav'));
+		}
+		this._currentSound = 0;
+
 		this.reset();
 	}
 
@@ -177,6 +183,9 @@ define([
 	SpaceshipScript.prototype.shoot = function () {
 		if (!this._entity || this._dead || this._timeSinceLastShot < SECS_PER_SHOT)
 			return;
+
+		this._sounds[this._currentSound].play();
+		this._currentSound = (this._currentSound + 1) % this._sounds.length;
 
 		var dir = this._entity.getRotation()[1];
 		var sin = Math.sin(dir);

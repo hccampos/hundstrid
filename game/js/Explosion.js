@@ -25,6 +25,8 @@ define([
 		this.attachChild(this._fireball);
 
 		this._canExplode = true;
+
+		this._sound = new Audio('assets/explosion.mp3');
 	}
 	Explosion.prototype = Object.create(Entity.prototype);
 	Explosion.prototype.constructor = Explosion;
@@ -34,6 +36,8 @@ define([
 		if (!this._canExplode) {
 			return;
 		}
+
+		this._sound.play();
 
 		this._sparks.explode(velocity);
 		this._fireball.explode(velocity);

@@ -15,7 +15,7 @@ var io = require('socket.io').listen(server, { log: false });
 
 require('./sockets')(io);
 
-var port = Number(process.env.PORT || 5000);
+var port = Number(process.env.PORT || 8001);
 server.listen(port, function() {
 	console.log("Listening on " + port);
 });

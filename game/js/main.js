@@ -130,10 +130,10 @@ require([
 	function setupLocalPlayers() {
 		var gamepadManager = new GamepadManager(game);
 
-		/*var player1 = game.addPlayer({
+		var player1 = game.addPlayer({
 			id: 'local1',
 			name: 'Player 1'
-		});*/
+		});
 		/*var player2 = game.addPlayer({
 			id: 'local2',
 			name: 'Player 2'
@@ -153,13 +153,13 @@ require([
 				}
 			}
 
-			/*game._onCommand({
+			game._onCommand({
 				id: 'local1',
 				command: {
 					type: 'keydown',
 					data: { key: event.key || event.keyCode }
 				}
-			});*/
+			});
 
 			/*game._onCommand({
 				id: 'local2',
@@ -171,13 +171,13 @@ require([
 		});
 
 		document.addEventListener('keyup', function (event) {
-			/*game._onCommand({
+			game._onCommand({
 				id: 'local1',
 				command: {
 					type: 'keyup',
 					data: { key: event.key || event.keyCode }
 				}
-			});*/
+			});
 
 			/*game._onCommand({
 				id: 'local2',
