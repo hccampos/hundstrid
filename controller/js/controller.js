@@ -88,15 +88,9 @@ require([
 		$('.shoot-button').on(eventName, function (event) {
 			event.preventDefault();
 
-			if (document.body.webkitRequestFullscreen) {
-				document.body.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-			}
+			goFullScreen();
 			sendCommand(CMD_SHOOT);
 		});
-
-		//document.mozRequestFullScreen();
-		//document.msRequestFullscreen();
-		//document.body.requestFullscreen();
 
 		//$window.on('mousedown', onMouseDown);
 		//$window.on('mousemove', onMouseMove);
@@ -105,6 +99,16 @@ require([
 			gyro.frequency = GYRO_FREQUENCY;
 			gyro.startTracking(onDeviceMotion);
 		}*/
+	}
+
+	function goFullScreen() {
+		var fn = document.body.requestFullscreen ||
+			document.body.webkitRequestFullscreen ||
+			document.msRequestFullscreen ||
+			document.mozRequestFullScreen;
+
+		if (!fn) { return; }
+		fn(Element.ALLOW_KEYBOARD_INPUT);
 	}
 
 
