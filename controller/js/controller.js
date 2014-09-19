@@ -75,8 +75,6 @@ require([
 	 * Adds the event listeners that will collect data and send it to the game.
 	 */
 	function addListeners() {
-		//$window.on('mousemove', onMouseMove);
-		//$window.on('touchmove', onTouchMove);
 		$window.on('keydown', onKeyDown);
 		$window.on('keyup', onKeyUp);
 
@@ -91,24 +89,19 @@ require([
 			goFullScreen();
 			sendCommand(CMD_SHOOT);
 		});
-
-		//$window.on('mousedown', onMouseDown);
-		//$window.on('mousemove', onMouseMove);
-
-		/*if (gyro.hasFeature('devicemotion')) {
-			gyro.frequency = GYRO_FREQUENCY;
-			gyro.startTracking(onDeviceMotion);
-		}*/
 	}
 
 	function goFullScreen() {
-		var fn = document.body.requestFullscreen ||
-			document.body.webkitRequestFullscreen ||
-			document.msRequestFullscreen ||
-			document.mozRequestFullScreen;
-
-		if (!fn) { return; }
-		fn(Element.ALLOW_KEYBOARD_INPUT);
+		var elem = document.body;
+		if (elem.requestFullscreen) {
+			elem.requestFullscreen();
+		} else if (elem.msRequestFullscreen) {
+			elem.msRequestFullscreen();
+		} else if (elem.mozRequestFullScreen) {
+			elem.mozRequestFullScreen();
+		} else if (elem.webkitRequestFullscreen) {
+			elem.webkitRequestFullscreen();
+		}
 	}
 
 
