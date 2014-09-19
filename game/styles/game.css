@@ -34,23 +34,9 @@ body {
 	background: white;
 	padding: 30px;
 	z-index: 9999;
-}
+	opacity: 0;
 
-#qr-code-wrapper label {
-	display: block;
-	margin-bottom: 10px;
-	font-size: 16px;
-}
-
-#qr-code {
-	display: block;
-	width: 200px;
-	height: 200px;
-	z-index: 10;
-	opacity: 1;
-	text-decoration: none;
-
-	/*-webkit-transform: scale(0.5, 0.5);
+	-webkit-transform: scale(0.5, 0.5);
 	-moz-transform: scale(0.5, 0.5);
 	-ms-transform: scale(0.5, 0.5);
 	-o-transform: scale(0.5, 0.5);
@@ -59,15 +45,21 @@ body {
 	-webkit-transition: all 500ms cubic-bezier(0.230, 1.000, 0.320, 1.000);
 	-moz-transition: all 500ms cubic-bezier(0.230, 1.000, 0.320, 1.000);
 	-o-transition: all 500ms cubic-bezier(0.230, 1.000, 0.320, 1.000);
-	transition: all 500ms cubic-bezier(0.230, 1.000, 0.320, 1.000);*/ /* easeOutQuint */
+	transition: all 500ms cubic-bezier(0.230, 1.000, 0.320, 1.000);
 
-	/*-webkit-transition-timing-function: cubic-bezier(0.230, 1.000, 0.320, 1.000);
+	-webkit-transition-timing-function: cubic-bezier(0.230, 1.000, 0.320, 1.000);
 	-moz-transition-timing-function: cubic-bezier(0.230, 1.000, 0.320, 1.000);
 	-o-transition-timing-function: cubic-bezier(0.230, 1.000, 0.320, 1.000);
-	transition-timing-function: cubic-bezier(0.230, 1.000, 0.320, 1.000);*/ /* easeOutQuint */
+	transition-timing-function: cubic-bezier(0.230, 1.000, 0.320, 1.000);
 }
 
-#qr-code.show {
+#qr-code-wrapper label {
+	display: block;
+	margin-bottom: 10px;
+	font-size: 16px;
+}
+
+#qr-code-wrapper.show {
 	opacity: 1;
 	pointer-events: auto;
 	-webkit-transform: scale(1, 1);
@@ -75,6 +67,14 @@ body {
 	-ms-transform: scale(1, 1);
 	-o-transform: scale(1, 1);
 	transform: scale(1, 1);
+}
+
+#qr-code {
+	display: block;
+	width: 200px;
+	height: 200px;
+	z-index: 10;
+	text-decoration: none;
 }
 
 #qr-code canvas {

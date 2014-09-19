@@ -26,6 +26,7 @@ define([
 		this._spaceship = null;
 		this._camera = null;
 		this._light = null;
+		this._phoneCount = 0;
 
 		this._colors = [
 			[97, 71, 150],
@@ -130,6 +131,10 @@ define([
 	 *         was added.
 	 */
 	Game.prototype._onPlayerConnected = function (data) {
+		if (!data.name) {
+			this._phoneCount++;
+			data.name = 'Phone ' + this._phoneCount;
+		}
 		this.addPlayer(data);
 	};
 

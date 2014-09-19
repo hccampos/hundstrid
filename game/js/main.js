@@ -19,6 +19,7 @@ require([
 	var loader;
 	var game;
 	var qrCodeElement;
+	var qrCodeWrapperElement;
 
 	init();
 
@@ -30,6 +31,7 @@ require([
 	 */
 	function init() {
 		qrCodeElement = document.getElementById('qr-code');
+		qrCodeWrapperElement = document.getElementById('qr-code-wrapper');
 
 		goo = new GooRunner({
 			antialias: true,
@@ -146,10 +148,10 @@ require([
 
 		document.addEventListener('keydown', function (event) {
 			if (event.keyCode === 13) { // ENTER
-				if (qrCodeElement.classList.contains('show')) {
-					qrCodeElement.classList.remove('show');
+				if (qrCodeWrapperElement.classList.contains('show')) {
+					qrCodeWrapperElement.classList.remove('show');
 				} else {
-					qrCodeElement.classList.add('show');
+					qrCodeWrapperElement.classList.add('show');
 				}
 			}
 

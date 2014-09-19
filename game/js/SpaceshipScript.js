@@ -13,7 +13,7 @@ define([
 	var ROTATION_REDUCTION_FACTOR = 0.85;
 	var BULLET_POS_OFFSET = 10;
 	var SECS_PER_SHOT = 0.02;
-	var GRAVITY = 30000;
+	var GRAVITY = 15000;
 
 	function SpaceshipScript(gamepad, ship, bulletManager, planet, getBounds) {
 		this._gamepad = gamepad;
