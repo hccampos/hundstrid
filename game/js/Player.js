@@ -60,7 +60,7 @@ define([
 
 		var world = this.game.world;
 
-		this.bulletManager = new BulletManager(world, 30);
+		this.bulletManager = new BulletManager(world, 50);
 
 		this.ship = new Ship(world).addToWorld();
 		this.ship.setModel(shipModel);

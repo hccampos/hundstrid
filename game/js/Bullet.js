@@ -1,6 +1,7 @@
 define([
 	'goo/entities/Entity',
 	'goo/math/Vector2',
+	'goo/math/Vector3',
 	'goo/renderer/Material',
 	'goo/renderer/TextureCreator',
 	'goo/renderer/shaders/ShaderLib',
@@ -11,6 +12,7 @@ define([
 ], function (
 	Entity,
 	Vector2,
+	Vector3,
 	Material,
 	TextureCreator,
 	ShaderLib,
@@ -24,11 +26,11 @@ define([
 	var X_ROTATION = -Math.PI / 2;
 	var DAMAGE = 100;
 
-	var textureCreator = new TextureCreator()
-	var bulletTexture = textureCreator.loadTexture2D('assets/beam.jpg');
+	var textureCreator = new TextureCreator();
+	var bulletTexture = textureCreator.loadTexture2D('assets/bullet.png');
 	var material = Material.createMaterial(ShaderLib.textured, 'BulletMaterial');
 	material.setTexture('DIFFUSE_MAP', bulletTexture);
-	material.blendState.blending = 'AdditiveBlending';
+	material.blendState.blending = 'CustomBlending';
 
 	// Quad where the bullet texture will be rendered.
 	var meshData = new Quad();
@@ -44,10 +46,13 @@ define([
 		this.speed = SPEED;
 		this.isAlive = false;
 
+		this._gravity = new Vector3();
+		this._velocity = new Vector3();
+
 		var transformComponent = new TransformComponent();
 		transformComponent.setTranslation(0, 0, 0);
 		transformComponent.setRotation(X_ROTATION, 0, 0);
-		transformComponent.setScale(SIZE * 2, SIZE / 3, 1);
+		transformComponent.setScale(SIZE * 2, SIZE / 0.5, 1);
 		this.setComponent(transformComponent);
 
 		var meshDataComponent = new MeshDataComponent(meshData);
@@ -66,17 +71,39 @@ define([
 	 * @param  {number} tpf
 	 * @param  {object} bounds
 	 */
-	Bullet.prototype.update = function (tpf, bounds) {
-		var translationX = this.speed * tpf * Math.sin(this.direction);
-		var translationZ = this.speed * tpf * Math.cos(this.direction);
-		this.addTranslation(translationX, 0, translationZ);
+	Bullet.prototype.update = function (tpf, bounds, planet) {
+		var t = this.transformComponent.worldTransform.translation;
+		var plannetPos = planet.transformComponent.worldTransform.translation;
+		var dist = plannetPos.distance(t);
+		var g = 1;
+		if (dist > 0)
+			g = 700000 / (dist * dist);
 
-		var t = this.getTranslation();
+		var gravity = this._gravity;
+		gravity.setv(plannetPos);
+		gravity.subv(t); // Vector from the ship to the planet.
+		gravity.normalize(); // Turns into a direction vector.
+		gravity.muld(g, g, g); // Becomes the gravity vector.
+
+		//var tmp = gravity[1];
+		//gravity[1] = gravity[2];
+		//gravity[2] = tmp;
+
+		var v = this._velocity;
+		v.addv(gravity); // Apply gravity.
+
+		var dX = v[0] * tpf;
+		var dZ = v[2] * tpf;
+		this.addTranslation(dX, 0, dZ);
+
+		this.setRotation(X_ROTATION, Math.atan2(dX, dZ) + Math.PI / 2, 0);
+
+		t = this.transformComponent.worldTransform.translation;
 		if (t[0] > bounds.maxX ||
 			t[0] < bounds.minX ||
 			t[2] > bounds.maxY ||
 			t[2] < bounds.minY) {
-			this.kill()
+			this.kill();
 		}
 	};
 
@@ -92,10 +119,11 @@ define([
 	Bullet.prototype.spawn = function (position, direction, speed) {
 		this.setTranslation(position);
 		this.setRotation(X_ROTATION, direction + Math.PI / 2, 0);
-		this.direction = direction;
-		this.speed = speed + SPEED;
 		this.isAlive = true;
 		this.damage = DAMAGE;
+		this._gravity.setd(0, 0, 0);
+		var newSpeed = speed + SPEED;
+		this._velocity.setd(Math.sin(direction) * newSpeed, 0, Math.cos(direction) * newSpeed);
 		this.addToWorld();
 	};
 

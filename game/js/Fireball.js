@@ -68,7 +68,6 @@ define([
 
 		var material = ParticleEntity.createMaterial('FireballMaterial', 'assets/explosion.png', 2004);
 		var blendState = material.blendState;
-		//blendState.blending = 'CustomBlending';
 		this.meshRendererComponent.materials.push(material);
 	}
 	Fireball.prototype = Object.create(ParticleEntity.prototype);

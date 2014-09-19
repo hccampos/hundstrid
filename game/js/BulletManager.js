@@ -29,11 +29,11 @@ define([
 	 * 		The screen bounds that are used to check if bullets went off the
 	 * 		screen.
 	 */
-	BulletManager.prototype.update = function (tpf, bounds) {
+	BulletManager.prototype.update = function (tpf, bounds, planet) {
 		for (var i = 0; i < this.numBullets; ++i) {
 			var bullet = this._bullets[i];
 			if (bullet.isAlive) {
-				bullet.update(tpf, bounds);
+				bullet.update(tpf, bounds, planet);
 			}
 		}
 	};

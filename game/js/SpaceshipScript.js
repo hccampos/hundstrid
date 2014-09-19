@@ -148,7 +148,7 @@ define([
 		//--------
 		// Bullets
 		//--------
-		this._bulletManager.update(tpf, bounds);
+		this._bulletManager.update(tpf, bounds, this._planet);
 		this._timeSinceLastShot += tpf;
 	};
 
