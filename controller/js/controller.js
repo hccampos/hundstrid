@@ -81,12 +81,16 @@ require([
 		$window.on('keyup', onKeyUp);
 
 		var eventName = 'mousedown';
-		if ('ontouchend' in document.documentElement) {
-			eventName = 'touchend';
+		if ('ontouchstart' in document.documentElement) {
+			eventName = 'touchstart';
 		}
 
-		$('.shoot-button').on(eventName, function () {
-			document.body.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+		$('.shoot-button').on(eventName, function (event) {
+			event.preventDefault();
+
+			if (document.body.webkitRequestFullscreen) {
+				document.body.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+			}
 			sendCommand(CMD_SHOOT);
 		});
 
