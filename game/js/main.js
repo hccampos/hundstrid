@@ -32,6 +32,7 @@ require([
 	function init() {
 		qrCodeElement = document.getElementById('qr-code');
 		qrCodeWrapperElement = document.getElementById('qr-code-wrapper');
+		qrCodeWrapperElement.classList.add('show');
 
 		goo = new GooRunner({
 			antialias: true,
@@ -136,22 +137,14 @@ require([
 			id: 'local1',
 			name: 'Player 1'
 		});
-		/*var player2 = game.addPlayer({
-			id: 'local2',
-			name: 'Player 2'
-		});
-
-		player2.setKeyForAction('rotateLeft', 65);
-		player2.setKeyForAction('rotateRight', 68);
-		player2.setKeyForAction('accelerate', 87);
-		player2.setKeyForAction('shoot', 16);*/
 
 		document.addEventListener('keydown', function (event) {
 			if (event.keyCode === 13) { // ENTER
-				if (qrCodeWrapperElement.classList.contains('show')) {
-					qrCodeWrapperElement.classList.remove('show');
+				var classes = qrCodeWrapperElement.classList;
+				if (classes.contains('show')) {
+					classes.remove('show');
 				} else {
-					qrCodeWrapperElement.classList.add('show');
+					classes.add('show');
 				}
 			}
 
@@ -162,14 +155,6 @@ require([
 					data: { key: event.key || event.keyCode }
 				}
 			});
-
-			/*game._onCommand({
-				id: 'local2',
-				command: {
-					type: 'keydown',
-					data: { key: event.key || event.keyCode }
-				}
-			});*/
 		});
 
 		document.addEventListener('keyup', function (event) {
@@ -180,14 +165,6 @@ require([
 					data: { key: event.key || event.keyCode }
 				}
 			});
-
-			/*game._onCommand({
-				id: 'local2',
-				command: {
-					type: 'keyup',
-					data: { key: event.key || event.keyCode }
-				}
-			});*/
 		});
 	}
 
@@ -208,7 +185,7 @@ require([
 
 	function onWindowResized(e) {
 		game.updateBounds();
-	};
+	}
 
 
 	/**
@@ -222,11 +199,11 @@ require([
 	function makeCode(id, key) {
 		var qrCode = new QRCode(qrCodeElement);
 
-		var baseUrl = getURL() + '/controller'
+		var baseUrl = getURL() + '/controller';
 		var encodedId = encodeURIComponent(id);
 		var encodedKey = encodeURIComponent(key);
 
-		var url = baseUrl + '?gameId=' + encodedId + '&key=' + encodedKey
+		var url = baseUrl + '?gameId=' + encodedId + '&key=' + encodedKey;
 		qrCode.makeCode(url);
 
 		qrCodeElement.setAttribute('href', url);
